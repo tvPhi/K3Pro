@@ -1,0 +1,203 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:K3Pro.App.ViewModels"
+             xmlns:l="using:K3Pro.App.Localization"
+             xmlns:p="using:K3Pro.Protocol"
+             x:Class="K3Pro.App.Views.KeymapView"
+             x:DataType="vm:KeymapViewModel">
+
+  <UserControl.DataTemplates>
+    <!-- One picker tab: groups, each with a grid of buttons -->
+    <DataTemplate DataType="vm:PickerTab">
+      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="10" Margin="0,4,6,0">
+          <Border Classes="note" IsVisible="{Binding HasNote}">
+            <TextBlock Text="{Binding Note}" TextWrapping="Wrap" />
+          </Border>
+          <ItemsControl ItemsSource="{Binding Sections}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:PickerSection">
+                <StackPanel Spacing="4" Margin="0,0,0,8" IsVisible="{Binding IsVisible}">
+                  <TextBlock Classes="section" Text="{Binding Title}" />
+                  <ItemsControl ItemsSource="{Binding Items}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <WrapPanel ItemSpacing="5" LineSpacing="5" />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate DataType="vm:PickerItem">
+                        <Button Classes="pick" Classes.selected="{Binding IsSelected}" Classes.locked="{Binding !IsEnabled}"
+                                IsVisible="{Binding IsVisible}" IsEnabled="{Binding IsEnabled}"
+                                ToolTip.Tip="{Binding Tooltip}" ToolTip.ShowOnDisabled="True"
+                                Command="{Binding $parent[UserControl].((vm:KeymapViewModel)DataContext).PickCommand}"
+                                CommandParameter="{Binding}">
+                          <TextBlock Text="{Binding Label}" />
+                        </Button>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </ScrollViewer>
+    </DataTemplate>
+  </UserControl.DataTemplates>
+
+  <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,*,Auto">
+    <!-- Warning: no keymap read command yet -->
+    <StackPanel Grid.ColumnSpan="2" Spacing="6" Margin="0,0,0,12">
+      <Border Classes="warn">
+        <TextBlock TextWrapping="Wrap" Text="{Binding KeymapWarn, Source={x:Static l:Tr.I}}" />
+      </Border>
+      <Border Classes="error" IsVisible="{Binding StateError, Converter={x:Static ObjectConverters.IsNotNull}}">
+        <TextBlock Text="{Binding StateError}" TextWrapping="Wrap" />
+      </Border>
+      <Border Classes="error" IsVisible="{Binding LayoutError, Converter={x:Static ObjectConverters.IsNotNull}}">
+        <TextBlock Text="{Binding LayoutError}" TextWrapping="Wrap" />
+      </Border>
+    </StackPanel>
+
+    <!-- Key layout (positions from layout.json) -->
+    <Border Grid.Row="1" Classes="card" Padding="20">
+      <Grid RowDefinitions="Auto,*">
+        <Grid ColumnDefinitions="Auto,*">
+          <TextBlock Classes="h2" Text="{Binding BaseLayer, Source={x:Static l:Tr.I}}" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="16,3,0,0">
+            <TextBlock Foreground="{StaticResource AccentBlue}" FontSize="11" Text="{Binding LegendRemapped, Source={x:Static l:Tr.I}}" />
+            <TextBlock Foreground="{StaticResource Amber}" FontSize="11" Text="{Binding LegendPending, Source={x:Static l:Tr.I}}" />
+            <TextBlock Classes="muted" FontSize="11" Text="{Binding LegendLocked, Source={x:Static l:Tr.I}}" />
+          </StackPanel>
+        </Grid>
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Margin="0,4,0,0">
+        <ItemsControl ItemsSource="{Binding Keys}" Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}"
+                      HorizontalAlignment="Left">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <Canvas />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.Styles>
+            <Style Selector="ContentPresenter" x:DataType="vm:KeyViewModel">
+              <Setter Property="Canvas.Left" Value="{Binding Left}" />
+              <Setter Property="Canvas.Top" Value="{Binding Top}" />
+            </Style>
+          </ItemsControl.Styles>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:KeyViewModel">
+              <Button Classes="key"
+                      Classes.selected="{Binding IsSelected}"
+                      Classes.remapped="{Binding IsRemapped}"
+                      Classes.pending="{Binding IsPending}"
+                      Classes.locked="{Binding !IsEditable}"
+                      Classes.knob="{Binding IsKnob}"
+                      Width="{Binding Width}" Height="{Binding Height}"
+                      ToolTip.Tip="{Binding Tooltip}"
+                      Command="{Binding $parent[ItemsControl].((vm:KeymapViewModel)DataContext).SelectKeyCommand}"
+                      CommandParameter="{Binding}">
+                <Grid RowDefinitions="*,Auto">
+                  <TextBlock Classes="keyLabel" Text="{Binding Label}" FontSize="{Binding LabelFontSize}" FontWeight="SemiBold"
+                             TextWrapping="Wrap" TextAlignment="Center"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  <TextBlock Grid.Row="1" Text="{Binding SubLabel}" FontSize="9" Classes="muted"
+                             HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                </Grid>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        </ScrollViewer>
+      </Grid>
+    </Border>
+
+    <!-- Pick a new function — laid out like the vendor app: tabs per group, button grid, the assigned button is highlighted -->
+    <Border Grid.Row="1" Grid.Column="1" Classes="card" Margin="12,0,0,0">
+      <Grid RowDefinitions="Auto,Auto,Auto,*">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Border Classes="current" Classes.pending="{Binding SelectedIsPending}" VerticalAlignment="Top">
+            <TextBlock Text="{Binding SelectedLabel}" />
+          </Border>
+          <StackPanel Grid.Column="1" Margin="12,0,0,0">
+            <TextBlock Classes="h2" Margin="0,0,0,2" Text="{Binding SelectedTitle}" />
+            <TextBlock Text="{Binding SelectedDetail}" Classes="muted" FontSize="12" TextWrapping="Wrap" />
+          </StackPanel>
+          <StackPanel Grid.Column="2" Spacing="6" Margin="12,0,0,0" VerticalAlignment="Top">
+            <ToggleButton Content="{Binding CaptureKey, Source={x:Static l:Tr.I}}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                          IsChecked="{Binding IsCapturing}" IsEnabled="{Binding CanEditSelected}"
+                          ToolTip.Tip="{Binding CaptureKeyTip, Source={x:Static l:Tr.I}}" />
+            <Button Content="{Binding KeyDefault, Source={x:Static l:Tr.I}}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                    Command="{Binding RevertSelectedToDefaultCommand}" IsEnabled="{Binding CanEditSelected}" />
+          </StackPanel>
+        </Grid>
+        <Border Grid.Row="1" Classes="capture" IsVisible="{Binding IsCapturing}" Margin="0,10,0,0">
+          <TextBlock TextWrapping="Wrap"
+                     Text="{Binding CaptureHint, Source={x:Static l:Tr.I}}" />
+        </Border>
+        <Rectangle Grid.Row="2" Height="1" Fill="{StaticResource CardBorder}" Margin="0,12,0,4" />
+        <TabControl Grid.Row="3" Classes="picker" SelectedIndex="{Binding CategoryIndex}" IsEnabled="{Binding CanEditSelected}">
+          <TabItem Header="{Binding PickerTabs[0].Header}">
+            <Grid RowDefinitions="Auto,*">
+              <TextBox Text="{Binding SearchText}" PlaceholderText="{Binding SearchPlaceholder, Source={x:Static l:Tr.I}}" Margin="0,0,0,6" />
+              <ContentControl Grid.Row="1" Content="{Binding PickerTabs[0]}" />
+            </Grid>
+          </TabItem>
+          <TabItem Header="{Binding PickerTabs[1].Header}">
+            <ContentControl Content="{Binding PickerTabs[1]}" />
+          </TabItem>
+          <TabItem Header="{Binding PickerTabs[2].Header}">
+            <ContentControl Content="{Binding PickerTabs[2]}" />
+          </TabItem>
+          <TabItem Header="{Binding PickerTabs[3].Header}">
+            <ContentControl Content="{Binding PickerTabs[3]}" />
+          </TabItem>
+          <TabItem Header="{Binding PickerTabs[4].Header}">
+            <ContentControl Content="{Binding PickerTabs[4]}" />
+          </TabItem>
+          <TabItem Header="{Binding ComboTab, Source={x:Static l:Tr.I}}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+              <StackPanel Spacing="10" Margin="0,4,0,0">
+                <TextBlock Classes="section" Text="{Binding ComboStep1, Source={x:Static l:Tr.I}}" />
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <ToggleButton Classes="mod" Content="Ctrl" IsChecked="{Binding ComboCtrl}" />
+                  <ToggleButton Classes="mod" Content="Shift" IsChecked="{Binding ComboShift}" />
+                  <ToggleButton Classes="mod" Content="Alt" IsChecked="{Binding ComboAlt}" />
+                  <ToggleButton Classes="mod" Content="Win" IsChecked="{Binding ComboWin}" />
+                </StackPanel>
+                <TextBlock Classes="section" Text="{Binding ComboStep2, Source={x:Static l:Tr.I}}" />
+                <ComboBox ItemsSource="{Binding AllowedUsages}" SelectedItem="{Binding ComboKey}" MinWidth="220"
+                          PlaceholderText="{Binding ComboKeyPlaceholder, Source={x:Static l:Tr.I}}" MaxDropDownHeight="360">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="p:HidUsage">
+                      <Grid ColumnDefinitions="*,Auto" MinWidth="180">
+                        <TextBlock Text="{Binding Name}" />
+                        <TextBlock Grid.Column="1" Classes="mono muted" Margin="12,0,0,0" Text="{Binding Code, StringFormat='0x{0:X2}'}" />
+                      </Grid>
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Border Classes="combo">
+                  <TextBlock Text="{Binding ComboHint}" />
+                </Border>
+                <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                           Text="{Binding ComboTip, Source={x:Static l:Tr.I}}" />
+              </StackPanel>
+            </ScrollViewer>
+          </TabItem>
+        </TabControl>
+      </Grid>
+    </Border>
+
+    <!-- Actions -->
+    <Grid Grid.Row="2" Grid.ColumnSpan="2" ColumnDefinitions="*,Auto" Margin="0,12,0,0">
+      <TextBlock Classes="muted" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                 Text="{Binding StatePathText}" />
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+        <Button Content="{Binding ResetToDefault, Source={x:Static l:Tr.I}}" Command="{Binding ResetToDefaultCommand}" />
+        <Button Content="{Binding DiscardChanges, Source={x:Static l:Tr.I}}" Command="{Binding DiscardPendingCommand}" IsEnabled="{Binding HasPending}" />
+        <Button Classes="accent" Content="{Binding ApplyText}" Command="{Binding ApplyCommand}" IsEnabled="{Binding HasPending}" />
+      </StackPanel>
+    </Grid>
+  </Grid>
+</UserControl>

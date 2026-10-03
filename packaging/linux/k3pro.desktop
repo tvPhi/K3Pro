@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=K3Pro
+GenericName=Numpad configurator
+Comment=Configure the Darmoshark K3 Pro numpad: key remapping, RGB effects, 2.4G sleep timer
+# Replace with the full path to K3Pro.App (see README-linux.txt)
+Exec=/opt/K3Pro/K3Pro.App
+Icon=k3pro
+Terminal=false
+Categories=Utility;Settings;HardwareSettings;
+Keywords=Darmoshark;K3 Pro;numpad;keypad;keyboard;remap;RGB;

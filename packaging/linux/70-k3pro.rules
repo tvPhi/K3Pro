@@ -1,0 +1,8 @@
+# Lets the logged-in user read / write the Darmoshark K3 Pro numpad's hidraw nodes (no need to run the app as root).
+# Install: sudo cp 70-k3pro.rules /etc/udev/rules.d/ && sudo udevadm control --reload-rules && sudo udevadm trigger
+# Named 70-… so the "uaccess" TAG is applied before 73-seat-late.rules.
+
+# Wired numpad (Sinowealth)
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="258a", ATTRS{idProduct}=="010c", TAG+="uaccess"
+# 2.4G receiver
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3554", ATTRS{idProduct}=="fa09", TAG+="uaccess"

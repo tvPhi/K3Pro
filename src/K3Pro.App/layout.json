@@ -1,0 +1,39 @@
+// Physical layout of the K3 Pro. Each key: matrix index (0–23, see docs/PROTOCOL.md), x/y position and w/h size in key units.
+// Defaults derived from the matrix order (4 columns × 6 rows, index = column*6 + row) — adjust by hand to match the real keys.
+// "label" is only the small default caption; when empty, the HID usage name of the default keymap is used. "labelEn" = English UI caption.
+// "shape": "knob" = drawn round (rotary knob). Top row as in the vendor app picture: 2 custom keys (index 0, 6) + the knob.
+// Indexes per the vendor app's KB.ini (Dev/kb/K3PRO): 18 = knob press ("切模式"), 11 = turn left, 23 = turn right.
+// Knob turn entries left empty = firmware adjusts the volume (left = down, right = up — confirmed). Knob press default = cycle the knob function.
+{
+  "unit": 62,
+  "gap": 6,
+  "keys": [
+    { "index": 0,  "x": 0, "y": 0 },
+    { "index": 6,  "label": "Fn",       "x": 1, "y": 0 },
+    { "index": 11, "label": "⟲ Vol−",   "x": 2.05, "y": 0.1, "w": 0.9, "h": 0.8 },
+    { "index": 18, "label": "Núm", "labelEn": "Knob",      "x": 3,    "y": 0,   "shape": "knob" },
+    { "index": 23, "label": "⟳ Vol+",   "x": 4.05, "y": 0.1, "w": 0.9, "h": 0.8 },
+
+    { "index": 1,  "x": 0, "y": 1 },
+    { "index": 7,  "x": 1, "y": 1 },
+    { "index": 13, "x": 2, "y": 1 },
+    { "index": 19, "x": 3, "y": 1 },
+
+    { "index": 2,  "x": 0, "y": 2 },
+    { "index": 8,  "x": 1, "y": 2 },
+    { "index": 14, "x": 2, "y": 2 },
+    { "index": 20, "x": 3, "y": 2, "h": 2 },
+
+    { "index": 3,  "x": 0, "y": 3 },
+    { "index": 9,  "x": 1, "y": 3 },
+    { "index": 15, "x": 2, "y": 3 },
+
+    { "index": 4,  "x": 0, "y": 4 },
+    { "index": 10, "x": 1, "y": 4 },
+    { "index": 16, "x": 2, "y": 4 },
+    { "index": 22, "x": 3, "y": 4, "h": 2 },
+
+    { "index": 5,  "x": 0, "y": 5, "w": 2 },
+    { "index": 17, "x": 2, "y": 5 }
+  ]
+}

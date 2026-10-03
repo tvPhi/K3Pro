@@ -1,0 +1,462 @@
+{
+ "source": "captures/47-led-ripples-shining.pcapng",
+ "reportId": 6,
+ "events": [],
+ "receiver": [
+  {
+   "frame": 3923,
+   "dir": "OUT",
+   "hex": "130701000000000000000000000000000000001b"
+  },
+  {
+   "frame": 3926,
+   "dir": "IN",
+   "hex": "130701000101000000000000000000000000001d"
+  },
+  {
+   "frame": 3938,
+   "dir": "OUT",
+   "hex": "1344010000000000000000000000000000000058"
+  },
+  {
+   "frame": 4048,
+   "dir": "IN",
+   "hex": "13440a000e0003030000000404070006200100ab"
+  },
+  {
+   "frame": 4052,
+   "dir": "IN",
+   "hex": "13440a010e010000000100040400ff040001007e"
+  },
+  {
+   "frame": 4054,
+   "dir": "IN",
+   "hex": "13440a020e000000000000000000000000000071"
+  },
+  {
+   "frame": 4060,
+   "dir": "IN",
+   "hex": "13440a030e000000000000000000000000000072"
+  },
+  {
+   "frame": 4062,
+   "dir": "IN",
+   "hex": "13440a040effff04470447044704470447044733"
+  },
+  {
+   "frame": 4066,
+   "dir": "IN",
+   "hex": "13440a050e044704470447044704470447044781"
+  },
+  {
+   "frame": 4068,
+   "dir": "IN",
+   "hex": "13440a060e04470447044704470447094709478c"
+  },
+  {
+   "frame": 4076,
+   "dir": "IN",
+   "hex": "13440a070e074707470744074407440744074489"
+  },
+  {
+   "frame": 4078,
+   "dir": "IN",
+   "hex": "13440a080e074407440909090909090909090967"
+  },
+  {
+   "frame": 4082,
+   "dir": "IN",
+   "hex": "13440a09025aa5000303000000040407000b20ab"
+  },
+  {
+   "frame": 4092,
+   "dir": "OUT",
+   "hex": "13040a000e00030300000004040700072001006c"
+  },
+  {
+   "frame": 4098,
+   "dir": "IN",
+   "hex": "13040a000e00030300000004040700072001006c"
+  },
+  {
+   "frame": 4108,
+   "dir": "OUT",
+   "hex": "13040a010e010000000100040400ff040001003e"
+  },
+  {
+   "frame": 4114,
+   "dir": "IN",
+   "hex": "13040a010e010000000100040400ff040001003e"
+  },
+  {
+   "frame": 4120,
+   "dir": "OUT",
+   "hex": "13040a020e000000000000000000000000000031"
+  },
+  {
+   "frame": 4134,
+   "dir": "IN",
+   "hex": "13040a020e000000000000000000000000000031"
+  },
+  {
+   "frame": 4138,
+   "dir": "OUT",
+   "hex": "13040a030e000000000000000000000000000032"
+  },
+  {
+   "frame": 4140,
+   "dir": "IN",
+   "hex": "13040a030e000000000000000000000000000032"
+  },
+  {
+   "frame": 4144,
+   "dir": "OUT",
+   "hex": "13040a040effff044704470447044704470447f3"
+  },
+  {
+   "frame": 4148,
+   "dir": "IN",
+   "hex": "13040a040effff044704470447044704470447f3"
+  },
+  {
+   "frame": 4152,
+   "dir": "OUT",
+   "hex": "13040a050e044704470447044704470447044741"
+  },
+  {
+   "frame": 4154,
+   "dir": "IN",
+   "hex": "13040a050e044704470447044704470447044741"
+  },
+  {
+   "frame": 4158,
+   "dir": "OUT",
+   "hex": "13040a060e04470447044704470447094709474c"
+  },
+  {
+   "frame": 4162,
+   "dir": "IN",
+   "hex": "13040a060e04470447044704470447094709474c"
+  },
+  {
+   "frame": 4166,
+   "dir": "OUT",
+   "hex": "13040a070e074707470744074407440744074449"
+  },
+  {
+   "frame": 4168,
+   "dir": "IN",
+   "hex": "13040a070e074707470744074407440744074449"
+  },
+  {
+   "frame": 4172,
+   "dir": "OUT",
+   "hex": "13040a080e074407440909090909090909090927"
+  },
+  {
+   "frame": 4176,
+   "dir": "IN",
+   "hex": "13040a080e074407440909090909090909090927"
+  },
+  {
+   "frame": 4180,
+   "dir": "OUT",
+   "hex": "13040a09025aa50000000000000000000000002b"
+  },
+  {
+   "frame": 4188,
+   "dir": "IN",
+   "hex": "13040a09025aa50000000000000000000000002b"
+  },
+  {
+   "frame": 4233,
+   "dir": "OUT",
+   "hex": "13091d000e000000000000000000000000000047"
+  },
+  {
+   "frame": 4242,
+   "dir": "IN",
+   "hex": "13091d000e000000000000000000000000000047"
+  },
+  {
+   "frame": 4250,
+   "dir": "OUT",
+   "hex": "13091d010e00000000000000ff00000000ff0046"
+  },
+  {
+   "frame": 4253,
+   "dir": "IN",
+   "hex": "13091d010e00000000000000ff00000000ff0046"
+  },
+  {
+   "frame": 4255,
+   "dir": "OUT",
+   "hex": "13091d020eff00ffff00ff00ff00ffffffffff3f"
+  },
+  {
+   "frame": 4257,
+   "dir": "IN",
+   "hex": "13091d020eff00ffff00ff00ff00ffffffffff3f"
+  },
+  {
+   "frame": 4259,
+   "dir": "OUT",
+   "hex": "13091d030eff00000000ff00ff00ffff00ff0044"
+  },
+  {
+   "frame": 4261,
+   "dir": "IN",
+   "hex": "13091d030eff00000000ff00ff00ffff00ff0044"
+  },
+  {
+   "frame": 4263,
+   "dir": "OUT",
+   "hex": "13091d040eff00ffffffffffff00000000ff0043"
+  },
+  {
+   "frame": 4265,
+   "dir": "IN",
+   "hex": "13091d040eff00ffffffffffff00000000ff0043"
+  },
+  {
+   "frame": 4267,
+   "dir": "OUT",
+   "hex": "13091d050eff00ffff00ff00ff00ffffffffff42"
+  },
+  {
+   "frame": 4269,
+   "dir": "IN",
+   "hex": "13091d050eff00ffff00ff00ff00ffffffffff42"
+  },
+  {
+   "frame": 4271,
+   "dir": "OUT",
+   "hex": "13091d060eff00000000ff00ff00ffff00ff0047"
+  },
+  {
+   "frame": 4273,
+   "dir": "IN",
+   "hex": "13091d060eff00000000ff00ff00ffff00ff0047"
+  },
+  {
+   "frame": 4275,
+   "dir": "OUT",
+   "hex": "13091d070eff00ffffffffffff00000000ff0046"
+  },
+  {
+   "frame": 4277,
+   "dir": "IN",
+   "hex": "13091d070eff00ffffffffffff00000000ff0046"
+  },
+  {
+   "frame": 4279,
+   "dir": "OUT",
+   "hex": "13091d080eff00ffff00ff00ff00ffffffffff45"
+  },
+  {
+   "frame": 4281,
+   "dir": "IN",
+   "hex": "13091d080eff00ffff00ff00ff00ffffffffff45"
+  },
+  {
+   "frame": 4283,
+   "dir": "OUT",
+   "hex": "13091d090eff00000000ff00ff00ffff00ff004a"
+  },
+  {
+   "frame": 4288,
+   "dir": "IN",
+   "hex": "13091d090eff00000000ff00ff00ffff00ff004a"
+  },
+  {
+   "frame": 4296,
+   "dir": "OUT",
+   "hex": "13091d0a0eff00ffffffffffff00000000ff0049"
+  },
+  {
+   "frame": 4298,
+   "dir": "IN",
+   "hex": "13091d0a0eff00ffffffffffff00000000ff0049"
+  },
+  {
+   "frame": 4302,
+   "dir": "OUT",
+   "hex": "13091d0b0eff00ffff00ff00ff00ffffffffff48"
+  },
+  {
+   "frame": 4308,
+   "dir": "IN",
+   "hex": "13091d0b0eff00ffff00ff00ff00ffffffffff48"
+  },
+  {
+   "frame": 4318,
+   "dir": "OUT",
+   "hex": "13091d0c0eff00000000ff00ff00ffff00ff004d"
+  },
+  {
+   "frame": 4320,
+   "dir": "IN",
+   "hex": "13091d0c0eff00000000ff00ff00ffff00ff004d"
+  },
+  {
+   "frame": 4326,
+   "dir": "OUT",
+   "hex": "13091d0d0eff00ffffffffffff00000000ff004c"
+  },
+  {
+   "frame": 4330,
+   "dir": "IN",
+   "hex": "13091d0d0eff00ffffffffffff00000000ff004c"
+  },
+  {
+   "frame": 4336,
+   "dir": "OUT",
+   "hex": "13091d0e0eff00ffff00ff00ff00ffffffffff4b"
+  },
+  {
+   "frame": 4338,
+   "dir": "IN",
+   "hex": "13091d0e0eff00ffff00ff00ff00ffffffffff4b"
+  },
+  {
+   "frame": 4342,
+   "dir": "OUT",
+   "hex": "13091d0f0eff00000000ff00ff00ffff00ff0050"
+  },
+  {
+   "frame": 4346,
+   "dir": "IN",
+   "hex": "13091d0f0eff00000000ff00ff00ffff00ff0050"
+  },
+  {
+   "frame": 4350,
+   "dir": "OUT",
+   "hex": "13091d100eff00ffffffffffff00000000ff004f"
+  },
+  {
+   "frame": 4352,
+   "dir": "IN",
+   "hex": "13091d100eff00ffffffffffff00000000ff004f"
+  },
+  {
+   "frame": 4356,
+   "dir": "OUT",
+   "hex": "13091d110eff00ffff00ff00ff00ffffffffff4e"
+  },
+  {
+   "frame": 4360,
+   "dir": "IN",
+   "hex": "13091d110eff00ffff00ff00ff00ffffffffff4e"
+  },
+  {
+   "frame": 4364,
+   "dir": "OUT",
+   "hex": "13091d120eff00000000ff00ff00ffff00ff0053"
+  },
+  {
+   "frame": 4366,
+   "dir": "IN",
+   "hex": "13091d120eff00000000ff00ff00ffff00ff0053"
+  },
+  {
+   "frame": 4370,
+   "dir": "OUT",
+   "hex": "13091d130eff00ffffffffffff00000000ff0052"
+  },
+  {
+   "frame": 4374,
+   "dir": "IN",
+   "hex": "13091d130eff00ffffffffffff00000000ff0052"
+  },
+  {
+   "frame": 4378,
+   "dir": "OUT",
+   "hex": "13091d140eff00ffff00ff00ff00ffffffffff51"
+  },
+  {
+   "frame": 4384,
+   "dir": "IN",
+   "hex": "13091d140eff00ffff00ff00ff00ffffffffff51"
+  },
+  {
+   "frame": 4388,
+   "dir": "OUT",
+   "hex": "13091d150eff00000000ff00ff00ffff00ff0056"
+  },
+  {
+   "frame": 4392,
+   "dir": "IN",
+   "hex": "13091d150eff00000000ff00ff00ffff00ff0056"
+  },
+  {
+   "frame": 4396,
+   "dir": "OUT",
+   "hex": "13091d160eff00ffffffffffff00000000ff0055"
+  },
+  {
+   "frame": 4398,
+   "dir": "IN",
+   "hex": "13091d160eff00ffffffffffff00000000ff0055"
+  },
+  {
+   "frame": 4404,
+   "dir": "OUT",
+   "hex": "13091d170eff00ffff00ff00ff00ffffffffff54"
+  },
+  {
+   "frame": 4408,
+   "dir": "IN",
+   "hex": "13091d170eff00ffff00ff00ff00ffffffffff54"
+  },
+  {
+   "frame": 4414,
+   "dir": "OUT",
+   "hex": "13091d180eff00000000ff00ff00ffff00ff0059"
+  },
+  {
+   "frame": 4420,
+   "dir": "IN",
+   "hex": "13091d180eff00000000ff00ff00ffff00ff0059"
+  },
+  {
+   "frame": 4430,
+   "dir": "OUT",
+   "hex": "13091d190eff00ffffffffffff00000000ff0058"
+  },
+  {
+   "frame": 4436,
+   "dir": "IN",
+   "hex": "13091d190eff00ffffffffffff00000000ff0058"
+  },
+  {
+   "frame": 4442,
+   "dir": "OUT",
+   "hex": "13091d1a0eff00ffff00ff00ff00ffffffffff57"
+  },
+  {
+   "frame": 4444,
+   "dir": "IN",
+   "hex": "13091d1a0eff00ffff00ff00ff00ffffffffff57"
+  },
+  {
+   "frame": 4448,
+   "dir": "OUT",
+   "hex": "13091d1b0eff00000000ff00ff00ffff00ff005c"
+  },
+  {
+   "frame": 4452,
+   "dir": "IN",
+   "hex": "13091d1b0eff00000000ff00ff00ffff00ff005c"
+  },
+  {
+   "frame": 4456,
+   "dir": "OUT",
+   "hex": "13091d1c07ff00ffffffffff0000000000000056"
+  },
+  {
+   "frame": 4462,
+   "dir": "IN",
+   "hex": "13091d1c07ff00ffffffffff0000000000000056"
+  }
+ ]
+}

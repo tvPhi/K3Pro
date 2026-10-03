@@ -1,0 +1,73 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:K3Pro.App.ViewModels"
+             xmlns:l="using:K3Pro.App.Localization"
+             x:Class="K3Pro.App.Views.DeviceView"
+             x:DataType="vm:DeviceViewModel">
+
+  <ScrollViewer>
+    <Grid ColumnDefinitions="*,*">
+      <StackPanel Spacing="12">
+        <!-- Connection -->
+        <Border Classes="card">
+          <StackPanel Spacing="6">
+            <TextBlock Classes="h2" Text="{Binding Connection, Source={x:Static l:Tr.I}}" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Ellipse Classes="status" Classes.on="{Binding Session.IsConnected}" Width="10" Height="10" />
+              <TextBlock Text="{Binding Session.ConnectionText}" />
+            </StackPanel>
+            <TextBlock Classes="mono" Text="{Binding Session.InfoText}" />
+            <SelectableTextBlock Classes="mono muted" FontSize="11" TextWrapping="Wrap" Text="{Binding Session.DevicePath}" />
+            <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                       Text="{Binding ConnectionNote, Source={x:Static l:Tr.I}}" />
+            <Button Content="{Binding Rescan, Source={x:Static l:Tr.I}}" Command="{Binding ReconnectCommand}" Margin="0,4,0,0" />
+          </StackPanel>
+        </Border>
+
+        <!-- Sleep 2.4G (offset 0x18) -->
+        <Border Classes="card">
+          <StackPanel Spacing="8">
+            <TextBlock Classes="h2" Text="{Binding SleepTitle, Source={x:Static l:Tr.I}}" />
+            <Grid ColumnDefinitions="*,Auto">
+              <Slider Minimum="{Binding SleepMin}" Maximum="{Binding SleepMax}" Value="{Binding SleepStopIndex}"
+                      TickFrequency="1" IsSnapToTickEnabled="True" />
+              <TextBlock Grid.Column="1" Classes="mono" Width="110" TextAlignment="Right" VerticalAlignment="Center"
+                         Text="{Binding SleepText}" />
+            </Grid>
+            <TextBlock Classes="muted" FontSize="12" Text="{Binding DeviceSleepLine}" />
+            <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                       Text="{Binding SleepNote, Source={x:Static l:Tr.I}}" />
+            <Button Classes="accent" HorizontalAlignment="Right" Content="Apply" Command="{Binding ApplySleepCommand}" />
+          </StackPanel>
+        </Border>
+
+        <!-- App data -->
+        <Border Classes="card">
+          <StackPanel Spacing="8">
+            <TextBlock Classes="h2" Text="{Binding AppData, Source={x:Static l:Tr.I}}" />
+            <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                       Text="{Binding AppDataNote, Source={x:Static l:Tr.I}}" />
+            <TextBlock Classes="muted" FontSize="12" Text="{Binding DelayText}" />
+            <TextBlock Classes="muted" FontSize="11" Margin="0,6,0,0" Text="{Binding Files, Source={x:Static l:Tr.I}}" />
+            <SelectableTextBlock Classes="mono muted" FontSize="11" TextWrapping="Wrap" Text="{Binding KeymapStatePath}" />
+            <SelectableTextBlock Classes="mono muted" FontSize="11" TextWrapping="Wrap" Text="{Binding LayoutPath}" />
+            <Button Content="{Binding OpenDataFolder, Source={x:Static l:Tr.I}}" Command="{Binding OpenDataFolderCommand}" />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+
+      <!-- Settings block, read-only -->
+      <Border Grid.Column="1" Classes="card" Margin="12,0,0,0" VerticalAlignment="Top">
+        <StackPanel Spacing="10">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Classes="h2" Text="{Binding SettingsBlockTitle, Source={x:Static l:Tr.I}}" />
+            <Button Grid.Column="1" Content="{Binding Read0x84, Source={x:Static l:Tr.I}}" Command="{Binding ReadSettingsCommand}" />
+          </Grid>
+          <SelectableTextBlock Classes="mono" FontSize="12" Text="{Binding SettingsDump}" />
+          <SelectableTextBlock Classes="mono" FontSize="12" TextWrapping="Wrap" Text="{Binding FieldsText}" />
+          <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{Binding ReferenceText}" />
+        </StackPanel>
+      </Border>
+    </Grid>
+  </ScrollViewer>
+</UserControl>

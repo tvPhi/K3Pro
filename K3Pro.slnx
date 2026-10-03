@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/K3Pro.App/K3Pro.App.csproj" />
+    <Project Path="src/K3Pro.Cli/K3Pro.Cli.csproj" />
+    <Project Path="src/K3Pro.Protocol/K3Pro.Protocol.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/K3Pro.App.Tests/K3Pro.App.Tests.csproj" />
+    <Project Path="tests/K3Pro.Protocol.Tests/K3Pro.Protocol.Tests.csproj" />
+  </Folder>
+</Solution>

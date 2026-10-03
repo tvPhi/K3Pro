@@ -1,0 +1,120 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:K3Pro.App.ViewModels"
+             xmlns:l="using:K3Pro.App.Localization"
+             xmlns:cp="using:Avalonia.Controls.Primitives"
+             x:Class="K3Pro.App.Views.LightingView"
+             x:DataType="vm:LightingViewModel">
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+  <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+    <!-- Light effects — same list as the vendor app -->
+    <Border Grid.ColumnSpan="2" Classes="card" Margin="0,0,0,12">
+      <Grid RowDefinitions="Auto,Auto,Auto,Auto">
+        <Grid ColumnDefinitions="*,Auto">
+          <StackPanel Orientation="Horizontal" Spacing="12">
+            <TextBlock Classes="h2" Text="{Binding EffectsTitle, Source={x:Static l:Tr.I}}" />
+            <TextBlock Classes="muted" FontSize="12" Margin="0,3,0,0" Text="{Binding EffectsSummary}" />
+          </StackPanel>
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+            <Button Content="{Binding Read0x84, Source={x:Static l:Tr.I}}" Command="{Binding RefreshModeCommand}" />
+            <Button Classes="accent" Content="{Binding ApplyEffect, Source={x:Static l:Tr.I}}" Command="{Binding ApplyEffectCommand}"
+                    IsEnabled="{Binding CanApplyEffect}" />
+          </StackPanel>
+        </Grid>
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding Effects}" Margin="0,4,0,8">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel ItemSpacing="6" LineSpacing="6" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:EffectItem">
+              <Button Classes="pick effect" Classes.selected="{Binding IsSelected}" Classes.current="{Binding IsCurrent}"
+                      Classes.locked="{Binding !IsEnabled}" IsEnabled="{Binding IsEnabled}"
+                      ToolTip.Tip="{Binding Tooltip}" ToolTip.ShowOnDisabled="True"
+                      Command="{Binding $parent[ItemsControl].((vm:LightingViewModel)DataContext).PickEffectCommand}"
+                      CommandParameter="{Binding}">
+                <TextBlock Text="{Binding Label}" />
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="28" Margin="0,0,0,8">
+          <StackPanel Spacing="2" IsVisible="{Binding ShowBrightness}" Width="260">
+            <TextBlock FontSize="12" Text="{Binding BrightnessText}" />
+            <Slider Minimum="0" Maximum="{Binding LevelMax}" Value="{Binding EffectBrightness}" TickFrequency="1"
+                    IsSnapToTickEnabled="True" TickPlacement="BottomRight" />
+          </StackPanel>
+          <StackPanel Spacing="2" IsVisible="{Binding ShowSpeed}" Width="260">
+            <TextBlock FontSize="12" Text="{Binding SpeedText}" />
+            <Slider Minimum="0" Maximum="{Binding LevelMax}" Value="{Binding EffectSpeed}" TickFrequency="1"
+                    IsSnapToTickEnabled="True" TickPlacement="BottomRight" />
+          </StackPanel>
+        </StackPanel>
+        <TextBlock Grid.Row="3" Classes="muted" FontSize="11.5" TextWrapping="Wrap" Text="{Binding EffectsNote, Source={x:Static l:Tr.I}}" />
+      </Grid>
+    </Border>
+
+    <Border Grid.Row="1" Classes="card" VerticalAlignment="Top">
+      <StackPanel Spacing="12" Width="320">
+        <cp:ColorSpectrum Color="{Binding SelectedColor}" Components="HueSaturation" Shape="Box"
+                          Width="320" Height="260" CornerRadius="6" />
+        <cp:ColorSlider Color="{Binding SelectedColor}" ColorModel="Hsva" ColorComponent="Component3"
+                        IsAlphaVisible="False" Orientation="Horizontal" Height="24"
+                        ToolTip.Tip="{Binding BrightnessTip, Source={x:Static l:Tr.I}}" />
+      </StackPanel>
+    </Border>
+
+    <Border Grid.Row="1" Grid.Column="1" Classes="card" Margin="12,0,0,0" VerticalAlignment="Top">
+      <StackPanel Spacing="14">
+        <TextBlock Classes="h2" Text="{Binding StaticColorTitle, Source={x:Static l:Tr.I}}" />
+
+        <StackPanel Orientation="Horizontal" Spacing="14">
+          <Border Width="96" Height="64" CornerRadius="8" Background="{Binding SelectedBrush}"
+                  BorderBrush="{StaticResource CardBorder}" BorderThickness="1" />
+          <StackPanel VerticalAlignment="Center" Spacing="2">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <TextBlock Classes="mono" FontSize="22" Text="#" VerticalAlignment="Center" />
+              <TextBox Classes="mono" FontFamily="{StaticResource MonoFont}" FontSize="18" Width="120" MaxLength="6"
+                       Text="{Binding HexInput}" PlaceholderText="RRGGBB" />
+            </StackPanel>
+            <TextBlock Classes="muted" FontSize="11" Text="{Binding RgbOrderNote, Source={x:Static l:Tr.I}}" />
+          </StackPanel>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+          <TextBlock Classes="muted" FontSize="12" Text="{Binding DefaultPalette, Source={x:Static l:Tr.I}}" />
+          <ItemsControl ItemsSource="{Binding Presets}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="6" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ColorPreset">
+                <Button Width="34" Height="34" Padding="0" CornerRadius="6" Background="{Binding Brush}"
+                        ToolTip.Tip="{Binding Name}"
+                        Command="{Binding $parent[ItemsControl].((vm:LightingViewModel)DataContext).PickPresetCommand}"
+                        CommandParameter="{Binding}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <TextBlock VerticalAlignment="Center" Text="{Binding ModeLine}" />
+          <Button Content="{Binding Read0x84, Source={x:Static l:Tr.I}}" Command="{Binding RefreshModeCommand}" />
+        </StackPanel>
+
+        <Border Classes="warn">
+          <TextBlock TextWrapping="Wrap" FontSize="12" Text="{Binding LightingWarn, Source={x:Static l:Tr.I}}" />
+        </Border>
+
+        <Button Classes="accent" HorizontalAlignment="Right" Content="Apply" Command="{Binding ApplyCommand}"
+                IsEnabled="{Binding !IsBusy}" />
+      </StackPanel>
+    </Border>
+  </Grid>
+  </ScrollViewer>
+</UserControl>
