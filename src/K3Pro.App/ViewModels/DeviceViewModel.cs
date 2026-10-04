@@ -15,9 +15,10 @@ public partial class DeviceViewModel : ObservableObject
     private readonly PacketLog _log;
 
     public DeviceViewModel(SessionViewModel session, IDeviceService device, WriteCoordinator writer, PacketLog log,
-        string keymapStatePath, string layoutPath, string dataDir)
+        string keymapStatePath, string layoutPath, string dataDir, UpdatesViewModel? updates = null)
     {
         Session = session;
+        Updates = updates;
         _device = device;
         _writer = writer;
         _log = log;
@@ -33,6 +34,7 @@ public partial class DeviceViewModel : ObservableObject
     private byte? _deviceSleep;
 
     public SessionViewModel Session { get; }
+    public UpdatesViewModel? Updates { get; }
     public string KeymapStatePath { get; }
     public string LayoutPath { get; }
     public string DataDir { get; }

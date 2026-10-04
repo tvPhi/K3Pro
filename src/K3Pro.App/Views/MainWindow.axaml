@@ -24,7 +24,10 @@
           </Border>
           <TextBlock Text="{Binding Session.InfoText}" Classes="mono muted" FontSize="12" VerticalAlignment="Center" />
         </StackPanel>
-        <ComboBox Grid.Column="3" ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" MinWidth="130"
+        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+        <Button Classes="accent" IsVisible="{Binding Updates.IsUpdateAvailable}" Content="{Binding Updates.UpdateButtonText}"
+                ToolTip.Tip="{Binding Updates.UpdateButtonTip}" Command="{Binding Updates.OpenReleaseCommand}" VerticalAlignment="Center" />
+        <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" MinWidth="130"
                   VerticalAlignment="Center" ToolTip.Tip="{Binding LanguageTip, Source={x:Static l:Tr.I}}">
           <ComboBox.ItemTemplate>
             <DataTemplate x:DataType="l:LanguageOption">
@@ -32,6 +35,7 @@
             </DataTemplate>
           </ComboBox.ItemTemplate>
         </ComboBox>
+        </StackPanel>
       </Grid>
     </Border>
 

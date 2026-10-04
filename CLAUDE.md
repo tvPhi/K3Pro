@@ -27,7 +27,9 @@ keep it short, don't explain basics.
 - `src/K3Pro.Cli`: CLI (`list`, `info`, `listen`, `getfeature`, `device-info`, `bluetooth`, `read-settings`, `set-mode`, `set-key`, `set-static-color`, `set-sleep`);
   picks wired / 2.4G automatically; dry-run prints exactly the packets or frames that would be sent.
 - `src/K3Pro.App`: Avalonia 12 + CommunityToolkit.Mvvm UI (tabs Keymap / Lighting / Device + log panel). `layout.json` = physical key positions.
-  App data in `%APPDATA%\K3Pro\` (`app-settings.json` = language, `keymap-state.json`, `logs/`).
+  App data in `%APPDATA%\K3Pro\` (`app-settings.json` = language + update check, `keymap-state.json`, `logs/`).
+  Update check (`Services/Updates.cs`): reads the public releases Atom feed (not the REST API — 60 req/h per IP), semver compare;
+  beta users also get betas. Version comes from `-p:Version` in the release workflow; local builds are `0.0.0-dev` (never auto-check).
   Bilingual VI / EN (first start follows the OS language: vi → VI, anything else → EN; switching takes effect immediately and is saved):
   `Lang.T(vi, en)` (K3Pro.Protocol) for strings in code, `Localization/Tr` for static XAML strings. Every new user-facing string needs
   both languages. The CLI stays in Vietnamese. Code comments and docs are in English.

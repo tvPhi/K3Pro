@@ -36,7 +36,7 @@ public partial class App : Application
             var vm = new MainWindowViewModel(new AppServices(
                 device, log,
                 new AppSettingsStore(AppPaths.SettingsFile), new KeymapStateStore(AppPaths.KeymapStateFile),
-                layout, layoutError, AppPaths.LayoutFile, AppPaths.DataDir, AppPaths.LogDir, systemLanguage));
+                layout, layoutError, AppPaths.LayoutFile, AppPaths.DataDir, AppPaths.LogDir, systemLanguage, new GitHubUpdateChecker()));
 
             desktop.MainWindow = new MainWindow { DataContext = vm };
             desktop.ShutdownRequested += (_, _) => device.Dispose();

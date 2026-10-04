@@ -18,6 +18,9 @@ internal static class Json
 /// <summary>app-settings.json: currently only the UI language ("vi" / "en").</summary>
 public sealed class AppSettings
 {
+    /// <summary>Check GitHub Releases for a newer version on startup (null = default on).</summary>
+    public bool? CheckUpdates { get; set; }
+
     /// <summary>null = the user hasn't chosen → follow the OS language.</summary>
     public string? Language { get; set; }
 

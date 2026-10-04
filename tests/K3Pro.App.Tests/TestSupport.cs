@@ -100,10 +100,10 @@ internal sealed class TestHarness : IDisposable
     public List<(string Message, bool IsError)> Notifications { get; } = [];
 
     /// <param name="systemLanguage">Fake "OS" language — defaults to Vi so tests don't depend on the machine they run on.</param>
-    public MainWindowViewModel CreateViewModel(UiLanguage systemLanguage = UiLanguage.Vi)
+    public MainWindowViewModel CreateViewModel(UiLanguage systemLanguage = UiLanguage.Vi, IUpdateChecker? updates = null, string? version = null)
     {
         var vm = new MainWindowViewModel(new AppServices(Device, Log, SettingsStore, KeymapStore,
-            LayoutConfig.Load(LayoutPath), null, LayoutPath, Dir, Path.Combine(Dir, "logs"), systemLanguage));
+            LayoutConfig.Load(LayoutPath), null, LayoutPath, Dir, Path.Combine(Dir, "logs"), systemLanguage, updates, version));
         vm.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(MainWindowViewModel.Notification) && vm.Notification is { } n)

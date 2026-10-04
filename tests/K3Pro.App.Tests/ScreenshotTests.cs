@@ -79,6 +79,16 @@ public class ScreenshotTests
         vm.SelectedTab = 0;
         Save(window, "5b-bluetooth-keymap-locked.png");
 
+        // Update available: top-bar button + Device tab card
+        h.Device.Raise(new K3Pro.App.Services.ConnectionState(true, "wired", DeviceInfo.Parse([0x03, 0x00, 0x00, 0x00, 0x00, 0x17]), null, ConnectionKind.Wired));
+        h.Device.RaiseBluetooth(K3Pro.Protocol.Bluetooth.BluetoothStatus.None);
+        var withUpdate = h.CreateViewModel(UiLanguage.En,
+            new FakeUpdates(new K3Pro.App.Services.ReleaseInfo("v0.1.0-beta.3", "https://example", true, false)), "0.1.0-beta.2");
+        await withUpdate.StartupUpdateCheck;
+        window.DataContext = withUpdate;
+        withUpdate.SelectedTab = 2;
+        Save(window, "6-update-available.png");
+
         Assert.True(File.Exists(Path.Combine(OutDir, "3-device.png")));
     }
 

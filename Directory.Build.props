@@ -4,5 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Local builds; the release workflow overrides it with -p:Version=X.Y.Z from the tag (used by the update check) -->
+    <Version>0.0.0-dev</Version>
   </PropertyGroup>
 </Project>

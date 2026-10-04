@@ -85,6 +85,12 @@ public sealed class Tr : ObservableObject
         "Apply lưu thẳng xuống numpad và báo kết quả; hex mọi gói gửi / nhận nằm trong log.",
         "Apply writes straight to the numpad and reports the result; the hex of every packet sent / received is in the log.");
     public string Files => T("File:", "Files:");
+    public string AppVersionTitle => T("Phiên bản app", "App version");
+    public string CheckForUpdates => T("Kiểm tra cập nhật", "Check for updates");
+    public string AutoCheckUpdates => T("Tự kiểm tra khi mở app", "Check automatically on startup");
+    public string UpdatesNote => T(
+        "Chỉ đọc feed release công khai trên GitHub (tvPhi/K3Pro/releases.atom) — không gửi dữ liệu nào về bạn hay thiết bị.",
+        "Only reads the public release feed on GitHub (tvPhi/K3Pro/releases.atom) — nothing about you or your device is sent.");
     public string OpenDataFolder => T("Mở thư mục dữ liệu", "Open data folder");
     public string SettingsBlockTitle => T("Block settings 128 byte (0x84, chỉ đọc)", "Settings block, 128 bytes (0x84, read-only)");
 

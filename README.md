@@ -75,6 +75,7 @@ code and are built automatically, but **nobody has tried them with the device ye
 | **Connection** | Uses the USB cable or the 2.4G receiver automatically. Reconnects by itself when the 2.4G numpad wakes up. |
 | **Battery (Bluetooth)** | In Bluetooth mode the top bar shows the **real battery level** (🔋 %), read by the OS from the standard BLE Battery Service (Windows for now). |
 | **Interface** | English and Vietnamese. A packet log shows every USB packet sent and received, for the curious. |
+| **Update check** | On startup the app checks the public [Releases](https://github.com/tvPhi/K3Pro/releases) feed and shows an "⬆ Update" button when a newer version exists (beta users also get betas). Can be turned off in the Device tab. |
 
 **Not supported yet** — the official app hasn't been captured doing these, and K3Pro never guesses:
 
@@ -189,11 +190,30 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 - **Settings block**: a read-only hex view of the 128-byte settings block, with the fields that are known.
 - **Open data folder**: opens the folder where the app keeps its files (see below).
 
+### Built-in FN shortcuts (on the numpad itself)
+
+These work without any software (from the official manual):
+
+| Shortcut | Function |
+|---|---|
+| **FN + 7 / 8 / 9** | Bluetooth: pair / switch between three paired devices |
+| **FN + −** | 2.4G: pair with the receiver |
+| **FN + /** | Cycle the light effect (12 built-in effects) |
+| **FN + \*** | Cycle the light color (effects that support a color) |
+| **FN + Backspace** | ⚠ Restore factory settings |
+
+- The **knob** also works on its own: turn = volume, press = cycle its function (brightness → volume → none).
+- If you **remap the Fn key** in K3Pro, these shortcuts stop working — select the Fn key and click **Default**
+  (or **Reset to default**) to get them back.
+- After **FN + Backspace** (factory reset), click **Reset to default** in the Keymap tab once, so K3Pro's saved keymap
+  matches the numpad again.
+- K3Pro offers all 17 effects plus brightness / speed, including the ones FN + / doesn't cycle through.
+
 ### Where the app stores its data
 
 | OS | Folder | Contents |
 |---|---|---|
-| Windows | `%APPDATA%\K3Pro\` | `app-settings.json` (language), `keymap-state.json` (your keymap), `logs/` |
+| Windows | `%APPDATA%\K3Pro\` | `app-settings.json` (language, update check), `keymap-state.json` (your keymap), `logs/` |
 | macOS / Linux | `~/.config/K3Pro/` | same |
 
 ---
@@ -209,6 +229,8 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 - **Self-define lighting.** If the numpad is in Self-define mode (set with the official app), switch to another effect once in
   the official app first.
 - **The knob** changes the volume by default. Pressing it cycles its function (brightness → volume → none).
+- **Factory reset (FN + Backspace)** restores the numpad's default keymap and lighting; click **Reset to default** in K3Pro
+  afterwards so the app's saved keymap matches again.
 - **Going back to the official app** is fine, because everything is stored on the numpad. The official app keeps its own profile,
   though, and saving there overwrites your settings with *its* profile.
 

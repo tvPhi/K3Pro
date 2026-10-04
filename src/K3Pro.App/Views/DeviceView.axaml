@@ -55,6 +55,23 @@
             <Button Content="{Binding OpenDataFolder, Source={x:Static l:Tr.I}}" Command="{Binding OpenDataFolderCommand}" />
           </StackPanel>
         </Border>
+
+        <!-- App version / update check -->
+        <Border Classes="card" IsVisible="{Binding Updates, Converter={x:Static ObjectConverters.IsNotNull}}">
+          <StackPanel Spacing="8">
+            <TextBlock Classes="h2" Text="{Binding AppVersionTitle, Source={x:Static l:Tr.I}}" />
+            <TextBlock Classes="mono" Text="{Binding Updates.CurrentVersionText}" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Button Content="{Binding CheckForUpdates, Source={x:Static l:Tr.I}}" Command="{Binding Updates.CheckCommand}"
+                      IsEnabled="{Binding Updates.CanCheck}" />
+              <Button Classes="accent" IsVisible="{Binding Updates.IsUpdateAvailable}" Content="{Binding Updates.UpdateButtonText}"
+                      Command="{Binding Updates.OpenReleaseCommand}" />
+            </StackPanel>
+            <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{Binding Updates.StatusText}" />
+            <CheckBox IsChecked="{Binding Updates.AutoCheck}" Content="{Binding AutoCheckUpdates, Source={x:Static l:Tr.I}}" />
+            <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap" Text="{Binding UpdatesNote, Source={x:Static l:Tr.I}}" />
+          </StackPanel>
+        </Border>
       </StackPanel>
 
       <!-- Settings block, read-only -->

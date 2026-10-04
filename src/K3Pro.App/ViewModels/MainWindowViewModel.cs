@@ -17,11 +17,14 @@ public sealed record AppServices(
     string LayoutPath,
     string DataDir,
     string LogDir,
-    UiLanguage SystemLanguage = UiLanguage.Vi);
+    UiLanguage SystemLanguage = UiLanguage.Vi,
+    IUpdateChecker? Updates = null,
+    string? CurrentVersion = null);
 
 public partial class MainWindowViewModel : ObservableObject
 {
     private readonly AppSettingsStore _settings;
+    private readonly AppSettings _appSettings;
     private readonly PacketLog _log;
     private readonly bool _ready;
 
@@ -30,14 +33,20 @@ public partial class MainWindowViewModel : ObservableObject
         _settings = s.SettingsStore;
         _log = s.Log;
         // Before building child VMs: right language from the start. Never chosen → follow the OS (vi → Vietnamese, else → English).
-        Lang.Current = s.SettingsStore.Load().ResolveLanguage(s.SystemLanguage);
+        _appSettings = s.SettingsStore.Load();
+        Lang.Current = _appSettings.ResolveLanguage(s.SystemLanguage);
         SelectedLanguage = LanguageOption.Of(Lang.Current);
         Log = new LogViewModel(s.Log, s.LogDir); // created first so no log entries from the other VMs are lost
         Session = new SessionViewModel();
+        Updates = new UpdatesViewModel(s.Updates, s.Log, s.CurrentVersion ?? AppVersion.Current, _appSettings.CheckUpdates ?? true, value =>
+        {
+            _appSettings.CheckUpdates = value;
+            SaveSettings();
+        });
         var writer = new WriteCoordinator(s.Device, s.Log, Notify);
         Keymap = new KeymapViewModel(s.Layout, s.LayoutError, s.KeymapStore, writer, s.Log);
         Lighting = new LightingViewModel(s.Device, writer, s.Log);
-        Device = new DeviceViewModel(Session, s.Device, writer, s.Log, s.KeymapStore.Path, s.LayoutPath, s.DataDir);
+        Device = new DeviceViewModel(Session, s.Device, writer, s.Log, s.KeymapStore.Path, s.LayoutPath, s.DataDir, Updates);
 
         if (s.LayoutError is not null) s.Log.Error(s.LayoutError);
         s.Device.ConnectionChanged += state => Ui.Post(() => Session.Apply(state));
@@ -45,6 +54,22 @@ public partial class MainWindowViewModel : ObservableObject
         s.Device.BluetoothChanged += status => Ui.Post(() => Session.Apply(status));
         Session.Apply(s.Device.Bluetooth);
         _ready = true;
+        StartupUpdateCheck = Updates.StartupCheckAsync();
+    }
+
+    /// <summary>The startup update check (completes immediately when disabled) — awaited by tests.</summary>
+    public Task StartupUpdateCheck { get; }
+
+    private void SaveSettings()
+    {
+        try
+        {
+            _settings.Save(_appSettings);
+        }
+        catch (IOException ex)
+        {
+            _log.Error(T($"Không lưu được {_settings.Path}: {ex.Message}", $"Could not save {_settings.Path}: {ex.Message}"));
+        }
     }
 
     public IReadOnlyList<LanguageOption> Languages => LanguageOption.All;
@@ -57,15 +82,10 @@ public partial class MainWindowViewModel : ObservableObject
     {
         if (!_ready || value is null) return;
         Lang.Current = value.Language;
-        try
-        {
-            _settings.Save(new AppSettings { Language = Lang.Code(value.Language) });
-        }
-        catch (IOException ex)
-        {
-            _log.Error(T($"Không lưu được {_settings.Path}: {ex.Message}", $"Could not save {_settings.Path}: {ex.Message}"));
-        }
+        _appSettings.Language = Lang.Code(value.Language);
+        SaveSettings();
         Session.RefreshLanguage();
+        Updates.RefreshLanguage();
         Keymap.RefreshLanguage();
         Lighting.RefreshLanguage();
         Device.RefreshLanguage();
@@ -73,6 +93,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     public SessionViewModel Session { get; }
+    public UpdatesViewModel Updates { get; }
     public KeymapViewModel Keymap { get; }
     public LightingViewModel Lighting { get; }
     public DeviceViewModel Device { get; }
