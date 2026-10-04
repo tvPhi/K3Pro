@@ -58,6 +58,9 @@ It works on **Windows, macOS and Linux**, over the **USB cable** or the **2.4G r
 Only the **Darmoshark K3 Pro** numpad is supported. Other Darmoshark keyboards (K6, K9 Pro, …) have different layouts
 and have not been captured yet.
 
+Inside the K3 Pro: a **BYK901** MCU (Sinowealth SH68F90A class), a separate 2.4G radio and a 1000 mAh LiPo battery.
+PCB photos and details are in [docs/PROTOCOL.md → Hardware](docs/PROTOCOL.md#hardware).
+
 **Tested so far:** Windows 11 with a real K3 Pro, over the cable and 2.4G. The macOS and Linux builds come from the same
 code and are built automatically, but **nobody has tried them with the device yet**. Please
 [open an issue](https://github.com/tvPhi/K3Pro/issues) with your results.

@@ -6,6 +6,28 @@ Sources: USBPcap captures of the vendor app — 01–05 (wired, the original set
 types, knob, sleep, battery, light effects). The raw `.pcapng` files are not published; the relevant packets are extracted into
 `tests/K3Pro.Protocol.Tests/Fixtures/` (`tools/make_fixtures.py`).
 
+## Hardware
+
+Photos by the author (2026-10-04, unit with a 2024 QC sticker):
+
+| Main PCB | MCU close-up | Case and battery |
+|---|---|---|
+| ![K3 Pro main PCB](images/hardware-pcb.jpg) | ![BYK901 MCU next to the USB-C port](images/hardware-mcu.jpg) | ![Bottom case with the 1000 mAh LiPo battery](images/hardware-case-battery.jpg) |
+
+- Main MCU **U1**: chip marked **BYK901** ✅, next to the USB-C port. BYK901 / BYK916 are rebranded Sinowealth SH68F90A-class
+  8051 keyboard MCUs with full-speed USB — consistent with the Sinowealth VID `258A` and with the `//K916 RGB` comment in the vendor
+  app's KB.ini ([GitHub topic byk901](https://github.com/topics/byk901)).
+- 2.4G radio: a separate QFN chip **U2** next to the PCB trace antenna, with its own crystal **Y3** (marking not readable on the photo ❓).
+  A silkscreened header near it is labelled `GND CLK MISO MOSI CS VCC` → presumably SPI between the MCU and the radio ❓.
+- Mode switch silkscreen: **`2.4G/OFF/BT`** ❓. The vendor app's KB.ini has `ChannelMask=3` and no Bluetooth device has been seen,
+  so the PCB is probably shared with a Bluetooth variant; Bluetooth is not covered by this document.
+- 6-pin header **J4** next to the MCU (possibly the ISP / programming header ❓ — never used by this project).
+- Battery: 3.7 V 1000 mAh LiPo (`HX 102340`, 3.7 Wh), 2-pin `BAT` connector; charging IC **U3** next to it ❓.
+  The battery level is not reported to the host (see "Battery %" below).
+- Hot-swap switch sockets (Jwick), one RGB LED per key, status LEDs `CH-LED` / `NUM` / `MODE`.
+- Open-source firmware / ISP flashing tools exist for this MCU family (e.g. SMK, sinowisp). K3Pro never touches firmware or the
+  bootloader (safety rule 4); this is noted for reference only.
+
 ## Transport
 
 - All commands go through **feature report `0x06`** (520 bytes) on interface 1. ✅
