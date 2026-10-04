@@ -81,7 +81,7 @@ $batches = @{
     )
     5 = @(
         @{ Name = "35-24g-battery";   Task = "[2.4G] Open the vendor app, open the place that shows Battery % (Device Info), wait ~10 seconds for the % to appear, REMEMBER the %, close the app. Do NOT Save anything." },
-        @{ Name = "36-24g-battery-2"; Task = "(Optional — do this once the battery % DIFFERS from 35, e.g. a few hours later) [2.4G] repeat 35 exactly, remember the %." },
+        @{ Name = "36-24g-battery-2"; Task = "(Not needed: the vendor app always shows a fixed 90%, see docs/PROTOCOL.md) [2.4G] repeat 35 exactly, remember the %." },
         @{ Name = "37-wired-battery"; Task = "(Optional) [Wired] Open the vendor app, check whether Device Info shows Battery %, wait ~10 seconds, remember the % (or 'not shown'), close the app." }
     )
     6 = @(

@@ -79,4 +79,4 @@ The user's main goal: change the sleep time in 2.4G mode (the vendor app hides t
 - Macros (receiver command `03`, not enabled), FN2 (the vendor app writes 3 pages), editing layers FN1 / FN2 / Tap, media keys other than Vol+/Mute,
   right mouse button: need more captures (`capture.ps1 -Batch 2 -Mode 24g`).
 - Lighting: 17 effects + brightness / speed 0..4 are done (capture batch 6, `04` only). Self-define (receiver command `02`, per-key colors) is not enabled.
-- Battery %: not found in any capture (35); waiting for capture 36 at a different level.
+- Battery %: not available — the vendor app always shows a fixed 90% (even fully charged) and no response ever changes (docs/PROTOCOL.md).

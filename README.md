@@ -233,6 +233,10 @@ bootloader (see [Safety](#safety)). It's still unofficial software, so use it at
 Press a key to wake the numpad, quit the official Darmoshark app (it competes for the receiver) and click **Device → Rescan**.
 On Linux, check that the udev rule is installed.
 
+**Can K3Pro show the battery level?**
+No. The numpad doesn't report a battery level that can be read. The official app's hidden battery display (normally switched off
+by Darmoshark) always shows 90%, even right after a full charge.
+
 **Do I need the official driver installed?**
 No. K3Pro talks to the device directly through the operating system's HID driver.
 

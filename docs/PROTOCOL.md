@@ -217,13 +217,16 @@ The file is only read, never copied into the repo. What matches the captures:
     The device may have brightness > 4 (`07`, `09` — from the knob?) ❓: the tool only displays it, and only writes 0..4 when the user drags the slider.
   - Self-define (capture 57): `0x0A = 15` + `0x09 = 01` ❓ + receiver command **`02`** (28 frames, per-key colors) — not enabled yet. When leaving Self-define (58 → OFF), the vendor app clears `0x09 = 00`;
     the tool refuses to change the effect when `0x09 ≠ 0` (leaving Self-define for another effect is not captured yet).
-- Battery % ❓ (2026-10-02): searched every capture 01–34 (read-only) — the receiver only has commands `01 03 04 05 07 09 44`, interrupt IN only carries `0x13` frames;
+- Battery % — **not available** (conclusion 2026-10-04, details below): the vendor app always shows **90%**, even right after a full charge,
+  and nothing it reads from the device ever changes → its battery display (hidden by default, `ShowPower=0` for K3PRO) shows a fixed
+  value, not a measurement. The numpad doesn't report a battery level over USB / 2.4G that we have seen, so K3Pro shows none.
+- Battery % investigation (2026-10-02): searched every capture 01–34 (read-only) — the receiver only has commands `01 03 04 05 07 09 44`, interrupt IN only carries `0x13` frames;
   no frame contains `5A` (90%) except the settings magic. The `05` response (`03 00 00 00 00 17 00 00 10 00`) is identical in every capture → no battery byte seen yet.
   The vendor app may only read the battery when Device Info is opened. Need capture `capture.ps1 -Batch 5` (35–37, noting the % shown by the vendor app) before building a battery UI.
   - Capture 35 (2.4G, vendor app opened Device Info, showing **90%**): the receiver only has `07` → `05` (resent once) → `07`; NO dedicated battery command.
     `05` response = `03 00 00 00 00 17 00 00 10 00` — identical in every capture from morning to evening (the vendor app has also shown 90% since the morning).
     → the battery level (if present) can only be in the last 4 bytes `00 00 10 00` ❓ (e.g. `10` = raw battery level?), or the vendor app shows a fixed number ❓.
-    KB.ini K3PRO: `Fw=24`, `Psd=3,0,0,0,0,17` (= first 6 bytes of `0x82` / `05`). Need capture 36 at a DIFFERENT % (fully charged, then unplugged) to confirm.
+    KB.ini K3PRO: `Fw=24`, `Psd=3,0,0,0,0,17` (= first 6 bytes of `0x82` / `05`). A capture at a different % was planned (36), but the vendor app shows 90% at every charge level (confirmed by the author 2026-10-04) → not needed.
   - Wired: the vendor app does NOT show Battery (confirmed by the author 2026-10-02) → battery % is only available in 2.4G, via the receiver.
 - Vendor app data in `%LOCALAPPDATA%\BYCOMBO4\` (read-only, 2026-10-02) — NO battery info:
   `K3PRO Keyboard\profile.dct` (14228 bytes) = vendor app profile: keymap as `02 <VK Windows>` (`90` NumLock, `6F` Num/, `FA` FN, `FD` Num Enter…),
@@ -237,5 +240,5 @@ The file is only read, never copied into the repo. What matches the captures:
 3. ~~Remap a key on the Fn layer → confirm page 1~~ (confirmed via KB.ini); FN2 / Tap ↔ page 2 / 3 still open (captures 06–08 have no write — redo with `-Mode 24g`)
 4. ~~Media key / combination with Ctrl, Shift → decode type and `p1`, `p2`~~ ✅ captures 09–15. Still open: other media keys (Vol −, Play/Pause…), right / middle mouse button, right-side modifiers
 5. Macro: partially decoded (captures 16, 16a, 16b — receiver command `03`), not enabled
-6. Battery %: capture 36 at a different level than capture 35 (90%)
+6. ~~Battery %~~ — not available: the vendor app always shows a fixed 90% (see "Battery %" above)
 7. Self-define per-key colors: receiver command `02` (capture 57), not decoded
