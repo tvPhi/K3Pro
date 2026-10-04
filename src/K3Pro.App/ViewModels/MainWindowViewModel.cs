@@ -42,6 +42,8 @@ public partial class MainWindowViewModel : ObservableObject
         if (s.LayoutError is not null) s.Log.Error(s.LayoutError);
         s.Device.ConnectionChanged += state => Ui.Post(() => Session.Apply(state));
         Session.Apply(s.Device.State);
+        s.Device.BluetoothChanged += status => Ui.Post(() => Session.Apply(status));
+        Session.Apply(s.Device.Bluetooth);
         _ready = true;
     }
 

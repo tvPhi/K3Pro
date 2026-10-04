@@ -79,6 +79,31 @@
     <Style Selector="Ellipse.status.on">
       <Setter Property="Fill" Value="{StaticResource Ok}" />
     </Style>
+    <Style Selector="Ellipse.status.bt">
+      <Setter Property="Fill" Value="{StaticResource AccentBlue}" />
+    </Style>
+    <Style Selector="Border.blocked">
+      <Setter Property="Background" Value="#33290F" />
+      <Setter Property="BorderBrush" Value="#7A5B17" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="12,6" />
+    </Style>
+    <Style Selector="Border.blocked.bt">
+      <Setter Property="Background" Value="#1F2A3D" />
+      <Setter Property="BorderBrush" Value="{StaticResource AccentBlue}" />
+    </Style>
+    <Style Selector="Border.battery">
+      <Setter Property="Background" Value="#16392A" />
+      <Setter Property="BorderBrush" Value="{StaticResource Ok}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="8,1" />
+    </Style>
+    <Style Selector="Border.battery TextBlock">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
 
     <!-- Keys on the layout -->
     <Style Selector="Button.key">

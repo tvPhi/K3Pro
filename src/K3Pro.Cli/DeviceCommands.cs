@@ -1,4 +1,5 @@
 using K3Pro.Protocol;
+using K3Pro.Protocol.Bluetooth;
 
 namespace K3Pro.Cli;
 
@@ -19,6 +20,22 @@ internal static class DeviceCommands
     private static string ReadInfoName(IK3ProConnection c) => c.Kind == ConnectionKind.Wired ? "0x82" : "0x05 (2.4G)";
 
     private static string ReadSettingsName(IK3ProConnection c) => c.Kind == ConnectionKind.Wired ? "0x84" : "0x44 (2.4G)";
+
+    /// <summary>Bluetooth mode: what the OS knows (battery from the BLE Battery Service). Nothing is sent to the numpad.</summary>
+    public static int BluetoothCmd()
+    {
+        var s = BluetoothBattery.Read();
+        if (s.Address is null)
+        {
+            Console.WriteLine("Không thấy numpad qua Bluetooth (K3PRO 5.0, HID 3554:FA07) — chưa ghép đôi với máy này, hoặc đang ở chế độ dây / 2.4G.");
+            return 1;
+        }
+        Console.WriteLine($"Bluetooth: K3PRO 5.0, địa chỉ {s.Address}, {(s.Connected ? "đang kết nối" : "đã ghép đôi nhưng chưa kết nối")}");
+        Console.WriteLine(s.BatteryPercent is { } b
+            ? $"Pin: {b}% (BLE Battery Service do hệ điều hành đọc — không gửi gì xuống numpad)"
+            : "Pin: chưa có dữ liệu");
+        return 0;
+    }
 
     public static int DeviceInfoCmd()
     {

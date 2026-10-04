@@ -13,6 +13,13 @@ public class ModelTests
     public void Os_language_vietnamese_or_else_english(string culture, UiLanguage expected) =>
         Assert.Equal(expected, Lang.FromCulture(CultureInfo.GetCultureInfo(culture)));
 
+    [Theory]
+    [InlineData(@"\\?\hid#{00001812-0000-1000-8000-00805f9b34fb}_dev_vid&023554_pid&fa07_rev&6701_eb968a1cc4a9&col02#a&d0d6800&0&0001#{4d1e55b2-f16f-11cf-88cb-001111000030}", "EB968A1CC4A9")]
+    [InlineData(@"\\?\hid#{00001812-0000-1000-8000-00805f9b34fb}_dev_vid&023554_pid&fa07_rev&6701_eb968a1cc4a9#a&d0d6800&0&0000#{4d1e55b2}", "EB968A1CC4A9")]
+    [InlineData(@"\\?\hid#vid_258a&pid_010c&mi_01&col06#9&28edd87a&0&0005#{4d1e55b2-f16f-11cf-88cb-001111000030}", null)]
+    public void Bluetooth_address_from_ble_hid_path(string path, string? expected) =>
+        Assert.Equal(expected, K3Pro.Protocol.Bluetooth.BluetoothBattery.AddressFromHidPath(path));
+
     [Fact]
     public void Settings_rejects_bad_magic_and_length()
     {

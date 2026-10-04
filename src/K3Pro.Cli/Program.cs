@@ -14,6 +14,7 @@ try
         "listen" => Run(() => LegacyCommands.Listen(HexArg(a, 0, "vid"), HexArg(a, 1, "pid")), a),
         "getfeature" => Run(() => LegacyCommands.GetFeature(HexArg(a, 0, "vid"), HexArg(a, 1, "pid"), HexArg(a, 2, "id")), a),
         "device-info" => Run(DeviceCommands.DeviceInfoCmd, a),
+        "bluetooth" => Run(DeviceCommands.BluetoothCmd, a),
         "read-settings" => Run(DeviceCommands.ReadSettingsCmd, a),
         "set-mode" => Run(() => DeviceCommands.SetMode(a), a, "--send"),
         "set-key" => Run(() => DeviceCommands.SetKey(a), a, "--send"),
@@ -56,6 +57,7 @@ static int Help()
 
         Đọc (chạy thẳng trên thiết bị):
           device-info                          0x82
+          bluetooth                            Chế độ Bluetooth: % pin hệ điều hành đọc từ BLE Battery Service (không gửi gì)
           read-settings                        0x84, in hex + field đã biết
 
         Ghi (mặc định DRY-RUN: in đủ hex gói, không gửi; --send để gửi thật):

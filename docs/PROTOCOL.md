@@ -19,11 +19,11 @@ Photos by the author (2026-10-04, unit with a 2024 QC sticker):
   app's KB.ini ([GitHub topic byk901](https://github.com/topics/byk901)).
 - 2.4G radio: a separate QFN chip **U2** next to the PCB trace antenna, with its own crystal **Y3** (marking not readable on the photo ❓).
   A silkscreened header near it is labelled `GND CLK MISO MOSI CS VCC` → presumably SPI between the MCU and the radio ❓.
-- Mode switch silkscreen: **`2.4G/OFF/BT`** ❓. The vendor app's KB.ini has `ChannelMask=3` and no Bluetooth device has been seen,
-  so the PCB is probably shared with a Bluetooth variant; Bluetooth is not covered by this document.
+- Mode switch silkscreen: **`2.4G/OFF/BT`** — Bluetooth works on this unit ✅ (pairs as "K3PRO 5.0", see the Bluetooth section),
+  although the vendor app's KB.ini only has `ChannelMask=3` and no BT VID/PID.
 - 6-pin header **J4** next to the MCU (possibly the ISP / programming header ❓ — never used by this project).
 - Battery: 3.7 V 1000 mAh LiPo (`HX 102340`, 3.7 Wh), 2-pin `BAT` connector; charging IC **U3** next to it ❓.
-  The battery level is not reported to the host (see "Battery %" below).
+  The battery level is reported only over Bluetooth (standard BLE Battery Service), not over the cable / 2.4G (see "Battery %" below).
 - Hot-swap switch sockets (Jwick), one RGB LED per key, status LEDs `CH-LED` / `NUM` / `MODE`.
 - Open-source firmware / ISP flashing tools exist for this MCU family (e.g. SMK, sinowisp). K3Pro never touches firmware or the
   bootloader (safety rule 4); this is noted for reference only.
@@ -210,6 +210,31 @@ The file is only read, never copied into the repo. What matches the captures:
 - Configuration over the receiver ✅ (captures 21–25, 33/34, batch 6): see the frame table above — `44` read settings, `04` write settings,
   `01` keymap pages 0–2, `09` color table; each write frame is echoed by the receiver.
 
+## Bluetooth (BLE, `3554:FA07`) — 2026-10-04, read-only observations
+
+- With the switch on **BT** the numpad pairs as **"K3PRO 5.0"**, a Bluetooth Low Energy HID-over-GATT device:
+  `BTHLE\DEV_<address>`, HID `VID&023554_PID&FA07` (VID source 02 = USB-IF, same vendor ID as the 2.4G receiver `3554:FA09`) ✅.
+- GATT services: Generic Access `1800`, Device Information `180A`, **Battery `180F`**, HID `1812` ✅.
+- **Battery %** ✅: Windows reads the standard Battery Service and stores it in the device property
+  `DEVPKEY_Bluetooth_Battery` = `{104EA319-6EE2-4701-BD47-8DDBF425BBE5} 2` (Byte) on the `BTHLE\DEV_<address>` node — **100** right
+  after a full charge. This is a real measurement, unlike the vendor app's fixed 90%. Reading it is a passive OS query (nothing is sent).
+  K3Pro reads it via `CM_Get_DevNode_PropertyW` (`BluetoothBattery`, CLI `bluetooth`) and shows it in the app's top bar.
+  `{83DA6326-97A6-4088-9453-A1923F573B29} 15` (Boolean) on the same node = `True` while connected ❓ (used as the "connected" flag).
+- HID collections over BLE (report descriptors read from Windows, nothing sent):
+
+  | Collection | Usage | Reports |
+  |---|---|---|
+  | COL01 | Keyboard `0001:0006` | IN id `01` len 9 (boot-style), OUT id `01` len 2 (LEDs) |
+  | COL02 | **Vendor `FF02:0002`** | **IN / OUT id `13`, len 20** — identical to the 2.4G receiver's vendor interface |
+  | COL03 | Keyboard `0001:0006` | IN id `02` len 21 (NKRO bitmap, usages 00–9F) |
+  | COL04 | Consumer `000C:0001` | IN id `03` len 3 |
+  | COL05 | System control `0001:0080` | IN id `04` len 2 |
+  | COL06 | Mouse `0001:0002` | IN id `05` len 7 |
+
+- ❓ The vendor collection looks identical to the 2.4G receiver's, but **configuration over Bluetooth is not supported**: the vendor
+  app can't change the keymap / lighting over Bluetooth either (checked by the author, 2026-10-04). Nothing is sent over Bluetooth;
+  K3Pro.App disables the Keymap / Lighting editors and the sleep Apply while the numpad is on Bluetooth only.
+
 ## Sleep (hidden in the vendor app)
 - `OemDrv.exe` reads the INI keys `ShowPower` and `SleepTime` from `KB.ini`; K3PRO, K6, K9PRO all have `ShowPower=0` and no `SleepTime` → the Sleep UI is hidden. ✅ (strings in the exe)
 - text.xml already contains the text for this feature: "In wireless mode, keyboard will go into sleep after idle for a specified time", units Second / Min. ✅
@@ -239,9 +264,10 @@ The file is only read, never copied into the repo. What matches the captures:
     The device may have brightness > 4 (`07`, `09` — from the knob?) ❓: the tool only displays it, and only writes 0..4 when the user drags the slider.
   - Self-define (capture 57): `0x0A = 15` + `0x09 = 01` ❓ + receiver command **`02`** (28 frames, per-key colors) — not enabled yet. When leaving Self-define (58 → OFF), the vendor app clears `0x09 = 00`;
     the tool refuses to change the effect when `0x09 ≠ 0` (leaving Self-define for another effect is not captured yet).
-- Battery % — **not available** (conclusion 2026-10-04, details below): the vendor app always shows **90%**, even right after a full charge,
-  and nothing it reads from the device ever changes → its battery display (hidden by default, `ShowPower=0` for K3PRO) shows a fixed
-  value, not a measurement. The numpad doesn't report a battery level over USB / 2.4G that we have seen, so K3Pro shows none.
+- Battery % — **not available over the cable / 2.4G** (conclusion 2026-10-04, details below): the vendor app always shows **90%**, even right
+  after a full charge, and nothing it reads from the device ever changes → its battery display (hidden by default, `ShowPower=0` for
+  K3PRO) shows a fixed value, not a measurement. **Over Bluetooth the standard BLE Battery Service reports the real level** ✅ (see the
+  Bluetooth section).
 - Battery % investigation (2026-10-02): searched every capture 01–34 (read-only) — the receiver only has commands `01 03 04 05 07 09 44`, interrupt IN only carries `0x13` frames;
   no frame contains `5A` (90%) except the settings magic. The `05` response (`03 00 00 00 00 17 00 00 10 00`) is identical in every capture → no battery byte seen yet.
   The vendor app may only read the battery when Device Info is opened. Need capture `capture.ps1 -Batch 5` (35–37, noting the % shown by the vendor app) before building a battery UI.

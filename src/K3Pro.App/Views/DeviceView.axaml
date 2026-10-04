@@ -13,7 +13,7 @@
           <StackPanel Spacing="6">
             <TextBlock Classes="h2" Text="{Binding Connection, Source={x:Static l:Tr.I}}" />
             <StackPanel Orientation="Horizontal" Spacing="8">
-              <Ellipse Classes="status" Classes.on="{Binding Session.IsConnected}" Width="10" Height="10" />
+              <Ellipse Classes="status" Classes.on="{Binding Session.IsConnected}" Classes.bt="{Binding Session.IsBluetoothOnly}" Width="10" Height="10" />
               <TextBlock Text="{Binding Session.ConnectionText}" />
             </StackPanel>
             <TextBlock Classes="mono" Text="{Binding Session.InfoText}" />
@@ -37,7 +37,8 @@
             <TextBlock Classes="muted" FontSize="12" Text="{Binding DeviceSleepLine}" />
             <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
                        Text="{Binding SleepNote, Source={x:Static l:Tr.I}}" />
-            <Button Classes="accent" HorizontalAlignment="Right" Content="Apply" Command="{Binding ApplySleepCommand}" />
+            <Button Classes="accent" HorizontalAlignment="Right" Content="Apply" Command="{Binding ApplySleepCommand}"
+                    IsEnabled="{Binding !Session.IsWriteBlocked}" />
           </StackPanel>
         </Border>
 
@@ -61,7 +62,7 @@
         <StackPanel Spacing="10">
           <Grid ColumnDefinitions="*,Auto">
             <TextBlock Classes="h2" Text="{Binding SettingsBlockTitle, Source={x:Static l:Tr.I}}" />
-            <Button Grid.Column="1" Content="{Binding Read0x84, Source={x:Static l:Tr.I}}" Command="{Binding ReadSettingsCommand}" />
+            <Button Grid.Column="1" IsEnabled="{Binding !Session.IsWriteBlocked}" Content="{Binding Read0x84, Source={x:Static l:Tr.I}}" Command="{Binding ReadSettingsCommand}" />
           </Grid>
           <SelectableTextBlock Classes="mono" FontSize="12" Text="{Binding SettingsDump}" />
           <SelectableTextBlock Classes="mono" FontSize="12" TextWrapping="Wrap" Text="{Binding FieldsText}" />

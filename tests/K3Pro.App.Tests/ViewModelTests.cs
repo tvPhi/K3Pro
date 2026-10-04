@@ -75,6 +75,30 @@ public class ViewModelTests
     }
 
     [AvaloniaFact]
+    public void Bluetooth_battery_shows_in_the_top_bar_while_connected()
+    {
+        using var h = new TestHarness();
+        h.Device.State = ConnectionState.Disconnected with { Error = "x" };
+        var vm = h.CreateViewModel(systemLanguage: UiLanguage.En);
+        Assert.False(vm.Session.HasBattery);
+
+        h.Device.RaiseBluetooth(new K3Pro.Protocol.Bluetooth.BluetoothStatus(true, 87, "EB968A1CC4A9"));
+        Assert.Equal("🔋 87%", vm.Session.BatteryText);
+        Assert.True(vm.Session.IsBluetoothOnly);
+        Assert.StartsWith("Using Bluetooth (K3PRO 5.0)", vm.Session.ConnectionText);
+        Assert.True(vm.Session.IsWriteBlocked); // keymap / lighting / sleep can't be changed over Bluetooth
+        Assert.StartsWith("On Bluetooth", vm.Session.WriteBlockedText);
+
+        h.Device.Raise(h.Device.State with { IsConnected = true, Error = null, Kind = ConnectionKind.Wired }); // cable plugged in as well
+        Assert.False(vm.Session.IsBluetoothOnly);
+        Assert.False(vm.Session.IsWriteBlocked);
+        Assert.True(vm.Session.HasBattery);
+
+        h.Device.RaiseBluetooth(K3Pro.Protocol.Bluetooth.BluetoothStatus.None); // switched to 2.4G / cable
+        Assert.False(vm.Session.HasBattery);
+    }
+
+    [AvaloniaFact]
     public void Old_settings_file_with_dry_run_field_still_loads()
     {
         using var h = new TestHarness();

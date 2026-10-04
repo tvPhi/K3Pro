@@ -10,15 +10,18 @@
         Width="1180" Height="880" MinWidth="980" MinHeight="680"
         Background="{StaticResource WindowBg}">
 
-  <Grid RowDefinitions="Auto,*,4,170">
+  <Grid RowDefinitions="Auto,Auto,*,4,170">
     <!-- Status bar -->
     <Border Grid.Row="0" Background="{StaticResource CardBg}" BorderBrush="{StaticResource CardBorder}"
             BorderThickness="0,0,0,1" Padding="16,10">
       <Grid ColumnDefinitions="Auto,Auto,*,Auto">
         <TextBlock Text="K3 Pro" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,20,0" />
         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-          <Ellipse Classes="status" Classes.on="{Binding Session.IsConnected}" Width="10" Height="10" />
+          <Ellipse Classes="status" Classes.on="{Binding Session.IsConnected}" Classes.bt="{Binding Session.IsBluetoothOnly}" Width="10" Height="10" />
           <TextBlock Text="{Binding Session.ConnectionText}" VerticalAlignment="Center" />
+          <Border Classes="battery" IsVisible="{Binding Session.HasBattery}" ToolTip.Tip="{Binding Session.BatteryTip}" VerticalAlignment="Center">
+            <TextBlock Text="{Binding Session.BatteryText}" />
+          </Border>
           <TextBlock Text="{Binding Session.InfoText}" Classes="mono muted" FontSize="12" VerticalAlignment="Center" />
         </StackPanel>
         <ComboBox Grid.Column="3" ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" MinWidth="130"
@@ -32,12 +35,23 @@
       </Grid>
     </Border>
 
-    <TabControl Grid.Row="1" Margin="12,4,12,8" SelectedIndex="{Binding SelectedTab}">
+    <!-- Not configurable right now (Bluetooth only / not connected): explains why the editors are disabled -->
+    <Border Grid.Row="1" Classes="blocked" Classes.bt="{Binding Session.IsBluetoothOnly}" IsVisible="{Binding Session.IsWriteBlocked}"
+            Margin="12,8,12,0">
+      <TextBlock Text="{Binding Session.WriteBlockedText}" TextWrapping="Wrap" />
+    </Border>
+
+    <TabControl Grid.Row="2" Margin="12,4,12,8" SelectedIndex="{Binding SelectedTab}">
       <TabItem Header="Keymap">
-        <views:KeymapView DataContext="{Binding Keymap}" Margin="0,8,0,0" />
+        <!-- Panel carries IsEnabled: its DataContext is still MainWindowViewModel (the view's is KeymapViewModel) -->
+        <Panel IsEnabled="{Binding !Session.IsWriteBlocked}">
+          <views:KeymapView DataContext="{Binding Keymap}" Margin="0,8,0,0" />
+        </Panel>
       </TabItem>
       <TabItem Header="Lighting">
-        <views:LightingView DataContext="{Binding Lighting}" Margin="0,8,0,0" />
+        <Panel IsEnabled="{Binding !Session.IsWriteBlocked}">
+          <views:LightingView DataContext="{Binding Lighting}" Margin="0,8,0,0" />
+        </Panel>
       </TabItem>
       <TabItem Header="Device">
         <views:DeviceView DataContext="{Binding Device}" Margin="0,8,0,0" />
@@ -45,13 +59,13 @@
     </TabControl>
 
     <!-- Notification after Apply -->
-    <Border Grid.Row="1" Classes="toast" Classes.err="{Binding NotificationIsError}" IsVisible="{Binding HasNotification}"
+    <Border Grid.Row="2" Classes="toast" Classes.err="{Binding NotificationIsError}" IsVisible="{Binding HasNotification}"
             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,6,20,0" MaxWidth="560" ZIndex="10">
       <TextBlock Text="{Binding Notification}" TextWrapping="Wrap" />
     </Border>
 
-    <GridSplitter Grid.Row="2" ResizeDirection="Rows" Background="{StaticResource CardBorder}" />
+    <GridSplitter Grid.Row="3" ResizeDirection="Rows" Background="{StaticResource CardBorder}" />
 
-    <views:LogView Grid.Row="3" DataContext="{Binding Log}" />
+    <views:LogView Grid.Row="4" DataContext="{Binding Log}" />
   </Grid>
 </Window>

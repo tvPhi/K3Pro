@@ -22,8 +22,9 @@ keep it short, don't explain basics.
 - `src/K3Pro.Protocol`: wired transport (`IHidTransport`, HidSharp, `LoggingTransport`) and 2.4G (`Wireless/`: `ReceiverFrame`,
   `ReceiverGuard`, `K3ProReceiverDevice`), `IK3ProConnection` + `K3ProConnections.Open` (wired first), `PacketBuilder` + `CommandGuard`, models,
   `CaptureBaseline` (base data extracted from captures), `KeymapRules` + `KeymapActions` (captured assignment types: key, modifier,
-  combo, Vol+/Mute, left click, lock PC), `LightingModes` (17 effects), `WritePlanner` (write plans shared by CLI and UI), `K3ProDevice.Execute`.
-- `src/K3Pro.Cli`: CLI (`list`, `info`, `listen`, `getfeature`, `device-info`, `read-settings`, `set-mode`, `set-key`, `set-static-color`, `set-sleep`);
+  combo, Vol+/Mute, left click, lock PC), `LightingModes` (17 effects), `WritePlanner` (write plans shared by CLI and UI), `K3ProDevice.Execute`,
+  `Bluetooth/BluetoothBattery` (BLE "K3PRO 5.0", HID `3554:FA07`: battery % read from the OS — passive, nothing is sent).
+- `src/K3Pro.Cli`: CLI (`list`, `info`, `listen`, `getfeature`, `device-info`, `bluetooth`, `read-settings`, `set-mode`, `set-key`, `set-static-color`, `set-sleep`);
   picks wired / 2.4G automatically; dry-run prints exactly the packets or frames that would be sent.
 - `src/K3Pro.App`: Avalonia 12 + CommunityToolkit.Mvvm UI (tabs Keymap / Lighting / Device + log panel). `layout.json` = physical key positions.
   App data in `%APPDATA%\K3Pro\` (`app-settings.json` = language, `keymap-state.json`, `logs/`).
@@ -79,4 +80,7 @@ The user's main goal: change the sleep time in 2.4G mode (the vendor app hides t
 - Macros (receiver command `03`, not enabled), FN2 (the vendor app writes 3 pages), editing layers FN1 / FN2 / Tap, media keys other than Vol+/Mute,
   right mouse button: need more captures (`capture.ps1 -Batch 2 -Mode 24g`).
 - Lighting: 17 effects + brightness / speed 0..4 are done (capture batch 6, `04` only). Self-define (receiver command `02`, per-key colors) is not enabled.
-- Battery %: not available — the vendor app always shows a fixed 90% (even fully charged) and no response ever changes (docs/PROTOCOL.md).
+- Battery %: not available over the cable / 2.4G (the vendor app shows a fixed 90%). Over Bluetooth the OS reads the BLE Battery Service and the app
+  shows it (Windows only so far; macOS / Linux not implemented).
+- Bluetooth configuration: not supported — the vendor app can't change keymap / lighting over Bluetooth either (user, 2026-10-04). The BLE vendor
+  collection (`FF02:0002`, report `0x13`) looks like the receiver's, but NOTHING is sent over Bluetooth. The UI disables editing while on Bluetooth only.

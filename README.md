@@ -73,6 +73,7 @@ code and are built automatically, but **nobody has tried them with the device ye
 | **RGB lighting** | 17 light effects: Fixed_on, Respire (breathing), Rainbow, Flash_away, Raindrops, Rainbow_wheel, Ripples_shining, Stars_twinkle, Shadow_disappear, Retro_snake, Neon_stream, Reaction, Sine_wave, Rotating windmill, Colorful waterfall, Blossoming, OFF. **Brightness and speed** (0–4) per effect. **Static color** with a color picker or hex input. |
 | **Sleep timer (2.4G)** | 30 s, 1, 1.5, 2, 3, 4, 5, 10, 15 or 20 min before the wireless numpad goes to sleep. |
 | **Connection** | Uses the USB cable or the 2.4G receiver automatically. Reconnects by itself when the 2.4G numpad wakes up. |
+| **Battery (Bluetooth)** | In Bluetooth mode the top bar shows the **real battery level** (🔋 %), read by the OS from the standard BLE Battery Service (Windows for now). |
 | **Interface** | English and Vietnamese. A packet log shows every USB packet sent and received, for the curious. |
 
 **Not supported yet** — the official app hasn't been captured doing these, and K3Pro never guesses:
@@ -80,7 +81,8 @@ code and are built automatically, but **nobody has tried them with the device ye
 - FN1 / FN2 / Tap layers and macros
 - Right-side modifiers, other media keys (Vol −, Play/Pause, …), right / middle mouse button, other system commands
 - "Self-define" per-key lighting
-- Battery level
+- Changing settings over Bluetooth (use the cable or 2.4G — settings are stored in the numpad and apply to every mode)
+- Battery level over the cable / 2.4G (the numpad only reports it over Bluetooth)
 
 In the app these items appear dimmed with a 🔒 tooltip.
 
@@ -237,8 +239,13 @@ Press a key to wake the numpad, quit the official Darmoshark app (it competes fo
 On Linux, check that the udev rule is installed.
 
 **Can K3Pro show the battery level?**
-No. The numpad doesn't report a battery level that can be read. The official app's hidden battery display (normally switched off
-by Darmoshark) always shows 90%, even right after a full charge.
+Yes, in **Bluetooth mode** (Windows for now): the numpad reports its real level through the standard BLE Battery Service and K3Pro
+shows it in the top bar. Over the cable or 2.4G the numpad doesn't report it — the official app's hidden battery display (normally
+switched off by Darmoshark) always shows 90%, even right after a full charge.
+
+**Does K3Pro work over Bluetooth?**
+The K3 Pro pairs as "K3PRO 5.0". K3Pro shows its battery level, but settings can only be changed over the cable or 2.4G for now
+(no capture of configuration over Bluetooth yet). Settings are stored in the numpad, so they apply in Bluetooth mode too.
 
 **Do I need the official driver installed?**
 No. K3Pro talks to the device directly through the operating system's HID driver.

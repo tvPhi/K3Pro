@@ -25,6 +25,16 @@ internal sealed class FakeDevice : IDeviceService
 {
     public event Action<ConnectionState>? ConnectionChanged;
 
+    public event Action<K3Pro.Protocol.Bluetooth.BluetoothStatus>? BluetoothChanged;
+
+    public K3Pro.Protocol.Bluetooth.BluetoothStatus Bluetooth { get; set; } = K3Pro.Protocol.Bluetooth.BluetoothStatus.None;
+
+    public void RaiseBluetooth(K3Pro.Protocol.Bluetooth.BluetoothStatus s)
+    {
+        Bluetooth = s;
+        BluetoothChanged?.Invoke(s);
+    }
+
     public ConnectionState State { get; set; } = new(true,
         @"\\?\hid#vid_258a&pid_010c&mi_01&col06#9&28edd87a&0&0005#{4d1e55b2-f16f-11cf-88cb-001111000030}",
         DeviceInfo.Parse([0x03, 0x00, 0x00, 0x00, 0x00, 0x17]), null, ConnectionKind.Wired);

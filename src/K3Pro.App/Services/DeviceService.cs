@@ -1,5 +1,6 @@
 using HidSharp;
 using K3Pro.Protocol;
+using K3Pro.Protocol.Bluetooth;
 using K3Pro.Protocol.Transport;
 using K3Pro.Protocol.Wireless;
 
@@ -17,6 +18,11 @@ public interface IDeviceService : IDisposable
     event Action<ConnectionState>? ConnectionChanged;
 
     ConnectionState State { get; }
+
+    /// <summary>Bluetooth mode (battery level read by the OS — nothing is sent). May be raised from a background thread.</summary>
+    event Action<BluetoothStatus>? BluetoothChanged;
+
+    BluetoothStatus Bluetooth { get; }
 
     void Start();
 
@@ -44,6 +50,7 @@ public sealed class HidDeviceService(PacketLog log) : IDeviceService
     private static readonly TimeSpan Debounce = TimeSpan.FromMilliseconds(400);
     public static readonly TimeSpan WakePollInterval = TimeSpan.FromSeconds(3);
     public static readonly TimeSpan LinkPollInterval = TimeSpan.FromSeconds(10);
+    public static readonly TimeSpan BluetoothPollInterval = TimeSpan.FromSeconds(15);
     private static string SleepingMessage => Lang.T("numpad 2.4G không phản hồi (đang ngủ / tắt) — bấm một phím, app tự kết nối lại",
         "2.4G numpad not responding (asleep / off) — press a key and the app reconnects automatically");
 
@@ -51,18 +58,28 @@ public sealed class HidDeviceService(PacketLog log) : IDeviceService
     private CancellationTokenSource? _debounce;
     private Timer? _pollTimer;
     private DateTime _nextPoll = DateTime.MinValue;
+    private DateTime _nextBluetoothPoll = DateTime.MinValue;
+    private int _bluetoothBusy;
     private bool _started;
 
     public event Action<ConnectionState>? ConnectionChanged;
 
+    public event Action<BluetoothStatus>? BluetoothChanged;
+
     public ConnectionState State { get; private set; } = ConnectionState.Disconnected;
+
+    public BluetoothStatus Bluetooth { get; private set; } = BluetoothStatus.None;
 
     public void Start()
     {
         if (_started) return;
         _started = true;
         DeviceList.Local.Changed += OnDeviceListChanged;
-        _pollTimer = new Timer(_ => _ = PollAsync(), null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+        _pollTimer = new Timer(_ =>
+        {
+            _ = PollAsync();
+            PollBluetooth(force: false);
+        }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         _ = RefreshAsync();
     }
 
@@ -98,6 +115,33 @@ public sealed class HidDeviceService(PacketLog log) : IDeviceService
         {
             ScheduleNextPoll();
             _gate.Release();
+        }
+    }
+
+    /// <summary>
+    /// Bluetooth status from the OS (<see cref="BluetoothBattery"/>): no device I/O, so it doesn't take the operation gate.
+    /// Every 15 s, and right away when DeviceList changes (BLE HID collections appear / disappear).
+    /// </summary>
+    private void PollBluetooth(bool force)
+    {
+        if (!force && DateTime.UtcNow < _nextBluetoothPoll) return;
+        if (Interlocked.Exchange(ref _bluetoothBusy, 1) == 1) return;
+        try
+        {
+            _nextBluetoothPoll = DateTime.UtcNow + BluetoothPollInterval;
+            var status = BluetoothBattery.Read();
+            if (status == Bluetooth) return;
+            if (status.Connected != Bluetooth.Connected)
+                log.Info(status.Connected
+                    ? Lang.T($"Bluetooth: K3PRO 5.0 đang kết nối ({status.Address}), pin {status.BatteryPercent?.ToString() ?? "?"}%",
+                        $"Bluetooth: K3PRO 5.0 connected ({status.Address}), battery {status.BatteryPercent?.ToString() ?? "?"}%")
+                    : Lang.T("Bluetooth: K3PRO 5.0 đã ngắt kết nối.", "Bluetooth: K3PRO 5.0 disconnected."));
+            Bluetooth = status;
+            BluetoothChanged?.Invoke(status);
+        }
+        finally
+        {
+            Volatile.Write(ref _bluetoothBusy, 0);
         }
     }
 
@@ -225,7 +269,9 @@ public sealed class HidDeviceService(PacketLog log) : IDeviceService
         var cts = _debounce = new CancellationTokenSource();
         _ = Task.Delay(Debounce, cts.Token).ContinueWith(t =>
         {
-            if (!t.IsCanceled) _ = RefreshAsync();
+            if (t.IsCanceled) return;
+            PollBluetooth(force: true);
+            _ = RefreshAsync();
         }, TaskScheduler.Default);
     }
 }

@@ -71,6 +71,14 @@ public class ScreenshotTests
         vm.SelectedTab = 1;
         Save(window, "4d-english-lighting.png");
 
+        // Bluetooth only: battery pill + "settings over cable / 2.4G only"
+        h.Device.Raise(K3Pro.App.Services.ConnectionState.Disconnected with { Error = "x" });
+        h.Device.RaiseBluetooth(new K3Pro.Protocol.Bluetooth.BluetoothStatus(true, 100, "EB968A1CC4A9"));
+        vm.SelectedTab = 2;
+        Save(window, "5-bluetooth.png");
+        vm.SelectedTab = 0;
+        Save(window, "5b-bluetooth-keymap-locked.png");
+
         Assert.True(File.Exists(Path.Combine(OutDir, "3-device.png")));
     }
 
