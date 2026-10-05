@@ -17,7 +17,7 @@ public sealed record AppServices(
     string LayoutPath,
     string DataDir,
     string LogDir,
-    UiLanguage SystemLanguage = UiLanguage.Vi,
+    string SystemLanguage = UiLanguage.Vi,
     IUpdateChecker? Updates = null,
     string? CurrentVersion = null);
 
@@ -68,7 +68,7 @@ public partial class MainWindowViewModel : ObservableObject
         }
         catch (IOException ex)
         {
-            _log.Error(T($"Không lưu được {_settings.Path}: {ex.Message}", $"Could not save {_settings.Path}: {ex.Message}"));
+            _log.Error(T("main.could_not_save", _settings.Path, ex.Message));
         }
     }
 
@@ -82,7 +82,7 @@ public partial class MainWindowViewModel : ObservableObject
     {
         if (!_ready || value is null) return;
         Lang.Current = value.Language;
-        _appSettings.Language = Lang.Code(value.Language);
+        _appSettings.Language = value.Language;
         SaveSettings();
         Session.RefreshLanguage();
         Updates.RefreshLanguage();

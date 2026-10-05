@@ -44,6 +44,7 @@ It works on **Windows, macOS and Linux**, over the **USB cable** or the **2.4G r
 - [Command-line tool](#command-line-tool)
 - [Building from source](#building-from-source)
 - [Help unlock more features](#help-unlock-more-features)
+- [Translations](#translations)
 - [License](#license)
 
 ---
@@ -74,7 +75,7 @@ code and are built automatically, but **nobody has tried them with the device ye
 | **Sleep timer (2.4G)** | 30 s, 1, 1.5, 2, 3, 4, 5, 10, 15 or 20 min before the wireless numpad goes to sleep. |
 | **Connection** | Uses the USB cable or the 2.4G receiver automatically. Reconnects by itself when the 2.4G numpad wakes up. |
 | **Battery (Bluetooth)** | In Bluetooth mode the top bar shows the **real battery level** (🔋 %), read by the OS from the standard BLE Battery Service (Windows for now). |
-| **Interface** | English and Vietnamese. A packet log shows every USB packet sent and received, for the curious. |
+| **Interface** | English and Vietnamese — any other language can be added with one JSON file ([Translations](#translations)). A packet log shows every USB packet sent and received, for the curious. |
 | **Update check** | On startup the app checks the public [Releases](https://github.com/tvPhi/K3Pro/releases) feed and shows an "⬆ Update" button when a newer version exists (beta users also get betas). Can be turned off in the Device tab. |
 
 **Not supported yet** — the official app hasn't been captured doing these, and K3Pro never guesses:
@@ -256,6 +257,10 @@ Yes. Use the **Key combo** tab, or click **⌨ Capture key** and press the short
 K3Pro only sends the exact commands the official app sends, keeps unknown bytes unchanged, and never touches firmware or the
 bootloader (see [Safety](#safety)). It's still unofficial software, so use it at your own risk.
 
+**Why do the LEDs turn off after a few seconds in 2.4G mode?**
+That's the numpad's firmware saving battery: in 2.4G mode the lighting turns off after about 5 seconds without a key press and
+comes back on the next key press. Over the cable it stays on. The official app has no setting for this, so K3Pro can't change it.
+
 **The app says "Not connected" / the 2.4G numpad isn't detected.**
 Press a key to wake the numpad, quit the official Darmoshark app (it competes for the receiver) and click **Device → Rescan**.
 On Linux, check that the udev rule is installed.
@@ -350,6 +355,22 @@ that a write was recorded. Then open an issue or a pull request with the `.pcapn
 the top of the script.
 
 Bug reports and test results on macOS and Linux are very welcome. [Open an issue](https://github.com/tvPhi/K3Pro/issues).
+
+## Translations
+
+All texts live in one JSON file per language: [`src/K3Pro.Protocol/Localization/en.json`](src/K3Pro.Protocol/Localization/en.json)
+(English, the reference) and [`vi.json`](src/K3Pro.Protocol/Localization/vi.json). To add a language:
+
+1. Copy `en.json` to `<code>.json`, using the two-letter ISO 639-1 code (e.g. `fr.json`, `de.json`, `ja.json`).
+2. Set `"language.name"` to the language's own name (e.g. `"Français"`) and translate the **values**.
+   Keep the keys, and keep placeholders such as `{0}`, `{1}` or `0x{0:X2}` (they're filled in by the app).
+3. Try it without building anything: put the file in a `lang` folder next to the app (`lang/fr.json` beside `K3Pro.App.exe`)
+   or in the app data folder (`%APPDATA%\K3Pro\lang\` on Windows, `~/.config/K3Pro/lang/` on macOS / Linux), then restart.
+   The language shows up in the 🌐 menu; on first start it is picked automatically if it matches the OS language.
+4. Open a pull request adding the file to `src/K3Pro.Protocol/Localization/` to ship it with the app.
+
+Missing keys fall back to English, so a partial translation still works. The tests check that every built-in language has the
+same keys and compatible placeholders as `en.json`. The CLI stays in Vietnamese.
 
 ## License
 

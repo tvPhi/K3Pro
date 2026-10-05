@@ -27,18 +27,8 @@ public sealed class HidSharpTransport : IHidTransport
         DeviceList.Local.GetHidDevices(K3ProConstants.WirelessVendorId, K3ProConstants.WirelessProductId).Any();
 
     public static string NotFoundMessage() => IsWirelessReceiverPresent()
-        ? Lang.T(
-            $"Không thấy numpad qua dây ({K3ProConstants.VendorId:X4}:{K3ProConstants.ProductId:X4}), chỉ thấy receiver 2.4G " +
-            $"({K3ProConstants.WirelessVendorId:X4}:{K3ProConstants.WirelessProductId:X4}). Nếu numpad đang ở chế độ 2.4G: chưa hỗ trợ — " +
-            "cắm dây và chuyển về chế độ có dây để cấu hình.",
-            $"Numpad not found over the cable ({K3ProConstants.VendorId:X4}:{K3ProConstants.ProductId:X4}), only the 2.4G receiver " +
-            $"({K3ProConstants.WirelessVendorId:X4}:{K3ProConstants.WirelessProductId:X4}). If the numpad is in 2.4G mode: not supported — " +
-            "plug in the cable and switch to wired mode to configure.")
-        : Lang.T(
-            $"Không thấy interface {K3ProConstants.VendorId:X4}:{K3ProConstants.ProductId:X4} " +
-            $"có feature report 0x{K3ProConstants.ReportId:X2} ({K3ProConstants.ReportLength} byte). Đã cắm dây chưa?",
-            $"No {K3ProConstants.VendorId:X4}:{K3ProConstants.ProductId:X4} interface " +
-            $"with feature report 0x{K3ProConstants.ReportId:X2} ({K3ProConstants.ReportLength} bytes) found. Is the cable plugged in?");
+        ? Lang.T("transport.numpad_not_found_over_cable", K3ProConstants.VendorId, K3ProConstants.ProductId, K3ProConstants.WirelessVendorId, K3ProConstants.WirelessProductId)
+        : Lang.T("transport.no_interface_with_feature_report", K3ProConstants.VendorId, K3ProConstants.ProductId, K3ProConstants.ReportId, K3ProConstants.ReportLength);
 
     public static HidSharpTransport Open()
     {
@@ -46,22 +36,19 @@ public sealed class HidSharpTransport : IHidTransport
         if (candidates.Count == 0)
             throw new IOException(NotFoundMessage());
         if (candidates.Count > 1)
-            throw new IOException(Lang.T($"Có {candidates.Count} interface khớp — không chắc chắn chọn đúng, dừng lại:\n  ",
-                                         $"{candidates.Count} matching interfaces — not sure which one is right, stopping:\n  ") +
+            throw new IOException(Lang.T("transport.matching_interfaces_not_sure_which", candidates.Count) +
                                   string.Join("\n  ", candidates.Select(d => d.DevicePath)));
 
         var device = candidates[0];
         if (!device.TryOpen(out var stream))
-            throw new IOException(Lang.T($"Không mở được {device.DevicePath} (app hãng đang chạy?).",
-                $"Could not open {device.DevicePath} (is the vendor app running?)."));
+            throw new IOException(Lang.T("transport.could_not_open_vendor_app", device.DevicePath));
         return new HidSharpTransport(device, stream);
     }
 
     public void SetFeature(byte[] report)
     {
         if (report.Length != K3ProConstants.ReportLength)
-            throw new ArgumentException(Lang.T($"Report phải dài {K3ProConstants.ReportLength} byte.",
-                $"Report must be {K3ProConstants.ReportLength} bytes."), nameof(report));
+            throw new ArgumentException(Lang.T("transport.report_must_be_bytes", K3ProConstants.ReportLength), nameof(report));
         _stream.SetFeature(report);
     }
 

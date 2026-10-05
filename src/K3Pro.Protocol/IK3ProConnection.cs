@@ -44,8 +44,7 @@ public static class WireEncoding
 
     public static string? WhyUnsupported(ConnectionKind kind, WritePlan plan) =>
         plan.Writes.FirstOrDefault(w => !Supports(kind, w)) is { } w
-            ? Lang.T($"{w.Title}: lệnh 0x{(byte)w.Command:X2} page {w.Header.Page} chưa có capture qua receiver 2.4G — cắm dây (chế độ có dây) để ghi.",
-                $"{w.Title}: command 0x{(byte)w.Command:X2} page {w.Header.Page} has no capture via the 2.4G receiver — plug in the cable (wired mode) to write.")
+            ? Lang.T("connection.command_0x_page_has_no", w.Title, (byte)w.Command, w.Header.Page)
             : null;
 
     /// <summary>Packets to send for a <see cref="PlannedWrite"/>: wired = one 520-byte packet; 2.4G = 20-byte frames.</summary>

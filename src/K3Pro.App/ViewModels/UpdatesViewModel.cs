@@ -34,7 +34,7 @@ public partial class UpdatesViewModel : ObservableObject
 
     public string CurrentVersion { get; }
 
-    public string CurrentVersionText => T($"Phiên bản đang dùng: {CurrentVersion}", $"Current version: {CurrentVersion}");
+    public string CurrentVersionText => T("updates.current_version", CurrentVersion);
 
     /// <summary>Check GitHub for a newer release every time the app starts.</summary>
     [ObservableProperty]
@@ -51,17 +51,17 @@ public partial class UpdatesViewModel : ObservableObject
 
     public string? NewVersion => _newer?.Version.ToString();
 
-    public string UpdateButtonText => T($"⬆ Bản mới {NewVersion}", $"⬆ Update {NewVersion}");
+    public string UpdateButtonText => T("updates.update", NewVersion);
 
-    public string UpdateButtonTip => T("Mở trang tải bản mới trên GitHub", "Open the download page on GitHub");
+    public string UpdateButtonTip => T("updates.open_download_page_github");
 
     public string StatusText => _phase switch
     {
-        Phase.Checking => T("Đang kiểm tra…", "Checking…"),
-        Phase.UpToDate => T("Đang dùng bản mới nhất.", "You're up to date."),
-        Phase.Available => T($"Có bản mới {NewVersion} — bấm để tải.", $"Version {NewVersion} is available — click to download."),
-        Phase.Failed => T($"Không kiểm tra được: {_error}", $"Couldn't check: {_error}"),
-        _ => _checker is null ? T("Kiểm tra cập nhật bị tắt trong bản này.", "Update checks are disabled in this build.") : "",
+        Phase.Checking => T("updates.checking"),
+        Phase.UpToDate => T("updates.you_re_up_date"),
+        Phase.Available => T("updates.version_available_click_download", NewVersion),
+        Phase.Failed => T("updates.couldn_t_check", _error),
+        _ => _checker is null ? T("updates.update_checks_are_disabled_this") : "",
     };
 
     /// <summary>Startup: auto-check unless turned off or running a local dev build. The task is exposed for tests.</summary>
@@ -81,7 +81,7 @@ public partial class UpdatesViewModel : ObservableObject
             _newer = UpdatePolicy.PickNewer(CurrentVersion, releases);
             SetPhase(_newer is null ? Phase.UpToDate : Phase.Available);
             if (_newer is { } n)
-                _log.Info(T($"Có bản mới {n.Version}: {n.Release.Url}", $"New version {n.Version} available: {n.Release.Url}"));
+                _log.Info(T("updates.new_version_available", n.Version, n.Release.Url));
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Xml.XmlException or IOException)
         {
@@ -100,7 +100,7 @@ public partial class UpdatesViewModel : ObservableObject
         }
         catch (Exception ex) when (ex is InvalidOperationException or System.ComponentModel.Win32Exception)
         {
-            _log.Error(T($"Không mở được {url}: {ex.Message}", $"Could not open {url}: {ex.Message}"));
+            _log.Error(T("device.could_not_open", url, ex.Message));
         }
     }
 

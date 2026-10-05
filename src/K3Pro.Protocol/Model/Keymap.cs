@@ -55,8 +55,7 @@ public sealed class KeymapPage
     {
         if (page > MaxPage) throw new ArgumentOutOfRangeException(nameof(page), page, $"Page 0–{MaxPage}.");
         if (data.Length != ByteLength)
-            throw new InvalidDataException(Lang.T($"Keymap page phải dài {ByteLength} byte (nhận {data.Length}).",
-                $"Keymap page must be {ByteLength} bytes (got {data.Length})."));
+            throw new InvalidDataException(Lang.T("keymapmodel.keymap_page_must_be_bytes", ByteLength, data.Length));
         var entries = new KeymapEntry[EntryCount];
         for (int i = 0; i < EntryCount; i++)
             entries[i] = KeymapEntry.Read(data[(i * KeymapEntry.Size)..]);

@@ -11,7 +11,7 @@ public partial class PickerItem(string label, KeymapEntry? entry, string? toolti
     public KeymapEntry? Entry { get; } = entry;
     public bool IsEnabled => Entry is not null;
     public string Tooltip { get; } = tooltip ?? (entry is { } e ? KeymapActions.Describe(e)
-        : T("🔒 Chưa có capture — sẽ mở khi có dữ liệu", "🔒 No capture yet — unlocks once captured"));
+        : T("picker.no_capture_yet_unlocks_once"));
 
     [ObservableProperty]
     public partial bool IsSelected { get; set; }
@@ -79,11 +79,11 @@ public static class KeyPickerCatalog
 
         var layer = new List<PickerItem> { Locked("FN"), Locked("FN2") };
 
-        var mouse = new List<PickerItem> { Action(KeymapActions.Mouse[0], T("🖱 Chuột trái", "🖱 Left click")) };
+        var mouse = new List<PickerItem> { Action(KeymapActions.Mouse[0], T("picker.left_click")) };
         mouse.AddRange(new[]
         {
-            T("🖱 Chuột phải", "🖱 Right click"), T("🖱 Chuột giữa", "🖱 Middle click"), "⏪ Back", "⏩ Forward",
-            T("⬆ Cuộn lên", "⬆ Scroll up"), T("⬇ Cuộn xuống", "⬇ Scroll down"), "⏸ Double click",
+            T("picker.right_click"), T("picker.middle_click"), "⏪ Back", "⏩ Forward",
+            T("picker.scroll_up"), T("picker.scroll_down"), "⏸ Double click",
         }.Select(Locked));
 
         var media = new List<PickerItem>
@@ -96,22 +96,22 @@ public static class KeyPickerCatalog
 
         var commands = new List<PickerItem>
         {
-            Locked(T("✖ Đóng cửa sổ", "✖ Close window")), Action(KeymapActions.Commands[0], T("🔒 Khóa máy", "🔒 Lock PC")), Locked("▶ Run"), Locked("🖥 Show desktop"),
+            Locked(T("picker.close_window")), Action(KeymapActions.Commands[0], T("picker.lock_pc")), Locked("▶ Run"), Locked("🖥 Show desktop"),
             Locked("⤢ Zoom in"), Locked("⤡ Zoom out"), Locked("📋 Task manager"), Locked("↶ Undo"), Locked("💾 Save"),
             Locked("⊞ Lock Win"), Locked("⌨ Lock Keyboard"),
         };
 
         return
         [
-            new(T("⌨ Bàn phím", "⌨ Keyboard"),
-                [new(T("Chữ & số", "Letters & digits"), comm), new(T("Chức năng", "Function"), adv), new("Keypad", keypad), new("Modifier", modify), new("Layer", layer)]),
-            new(T("🖱 Chuột", "🖱 Mouse"), [new(T("Chuột", "Mouse"), mouse)],
-                T("Mới có capture nút trái. Các nút khác mở khi có capture.", "Only the left button has a capture so far. Other buttons unlock once captured.")),
-            new("🎵 Media", [new(T("Phát nhạc / âm lượng", "Playback / volume"), media), new(T("Ứng dụng / màn hình", "Apps / screen"), mediaApps)],
-                T("Mới có capture Mute và Volume +.", "Only Mute and Volume + have captures so far.")),
-            new("Macro", [], T("Macro: đã giải mã một phần (capture 16) — chưa hỗ trợ ghi.", "Macro: partially decoded (capture 16) — writing is not supported yet.")),
-            new(T("⚡ Lệnh", "⚡ Commands"), [new(T("Lệnh hệ thống", "System commands"), commands)],
-                T("Mới có capture Khóa máy (Win + L).", "Only Lock PC (Win + L) has a capture so far.")),
+            new(T("picker.keyboard"),
+                [new(T("picker.letters_digits"), comm), new(T("picker.function"), adv), new("Keypad", keypad), new("Modifier", modify), new("Layer", layer)]),
+            new(T("picker.mouse"), [new(T("picker.mouse_2"), mouse)],
+                T("picker.only_left_button_has_capture")),
+            new("🎵 Media", [new(T("picker.playback_volume"), media), new(T("picker.apps_screen"), mediaApps)],
+                T("picker.only_mute_volume_have_captures")),
+            new("Macro", [], T("picker.macro_partially_decoded_capture_16")),
+            new(T("picker.commands"), [new(T("picker.system_commands"), commands)],
+                T("picker.only_lock_pc_win_l")),
         ];
     }
 }

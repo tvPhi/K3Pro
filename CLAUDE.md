@@ -30,9 +30,12 @@ keep it short, don't explain basics.
   App data in `%APPDATA%\K3Pro\` (`app-settings.json` = language + update check, `keymap-state.json`, `logs/`).
   Update check (`Services/Updates.cs`): reads the public releases Atom feed (not the REST API — 60 req/h per IP), semver compare;
   beta users also get betas. Version comes from `-p:Version` in the release workflow; local builds are `0.0.0-dev` (never auto-check).
-  Bilingual VI / EN (first start follows the OS language: vi → VI, anything else → EN; switching takes effect immediately and is saved):
-  `Lang.T(vi, en)` (K3Pro.Protocol) for strings in code, `Localization/Tr` for static XAML strings. Every new user-facing string needs
-  both languages. The CLI stays in Vietnamese. Code comments and docs are in English.
+  Translations: JSON files `src/K3Pro.Protocol/Localization/<code>.json` (embedded; `en` = reference, `vi`), plus extra / user files from
+  `<exe dir>/lang/` and `<app data>/lang/`. In code: `Lang.T("area.key", args…)` (string.Format placeholders `{0}`, `{0:X2}`);
+  `Localization/Tr` exposes the static XAML strings. Every new user-facing string = a new key in `en.json` AND `vi.json` (tests check
+  that keys / placeholders match and that every key used in src exists). Don't build language-specific words in code (plurals,
+  "read"/"write") — give them their own keys. First start follows the OS language if a translation exists, otherwise English;
+  the CLI keeps Vietnamese (Lang default). Code comments and docs are in English.
 - `tests/K3Pro.Protocol.Tests`: xUnit v2, golden tests comparing byte-for-byte with real packets from the captures (fixtures in `Fixtures/`).
 - `tests/K3Pro.App.Tests`: xUnit v3 + Avalonia.Headless, ViewModels against a fake device; screenshots go to `bin/.../screenshots/`.
 - `legacy/K3ProTool`: old console tool (read-only), kept for reference.

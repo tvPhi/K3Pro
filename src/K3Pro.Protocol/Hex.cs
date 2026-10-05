@@ -33,7 +33,7 @@ public static class Hex
     /// <summary>Differing byte ranges [start, end) between two buffers of equal length.</summary>
     public static IReadOnlyList<(int Start, int End)> DiffRanges(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b)
     {
-        if (a.Length != b.Length) throw new ArgumentException(Lang.T("Hai buffer phải cùng độ dài.", "Both buffers must have the same length."));
+        if (a.Length != b.Length) throw new ArgumentException(Lang.T("hex.both_buffers_must_have_same"));
         var ranges = new List<(int, int)>();
         int i = 0;
         while (i < a.Length)

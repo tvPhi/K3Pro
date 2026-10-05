@@ -20,6 +20,9 @@ public partial class App : Application
             var device = new HidDeviceService(log);
 
             // Apply the saved language before reading the layout (so error messages use the right language)
+            // Extra / user translations: <exe dir>/lang/*.json and <app data>/lang/*.json (built-in en / vi are embedded)
+            K3Pro.Protocol.Lang.AddSearchDirectory(Path.Combine(AppContext.BaseDirectory, "lang"));
+            K3Pro.Protocol.Lang.AddSearchDirectory(Path.Combine(AppPaths.DataDir, "lang"));
             var systemLanguage = K3Pro.Protocol.Lang.FromCulture(System.Globalization.CultureInfo.CurrentUICulture);
             K3Pro.Protocol.Lang.Current = new AppSettingsStore(AppPaths.SettingsFile).Load().ResolveLanguage(systemLanguage);
             LayoutConfig? layout = null;
@@ -30,7 +33,7 @@ public partial class App : Application
             }
             catch (Exception ex) when (ex is IOException or InvalidDataException or System.Text.Json.JsonException)
             {
-                layoutError = K3Pro.Protocol.Lang.T($"Không đọc được {AppPaths.LayoutFile}: {ex.Message}", $"Could not read {AppPaths.LayoutFile}: {ex.Message}");
+                layoutError = K3Pro.Protocol.Lang.T("app.could_not_read", AppPaths.LayoutFile, ex.Message);
             }
 
             var vm = new MainWindowViewModel(new AppServices(

@@ -4,17 +4,17 @@ public enum KeymapActionKind { Key, Modifier, Combo, Media, Mouse, Command }
 
 /// <summary>A key-assignment choice with a fixed entry (modifier / media / mouse / command).</summary>
 /// <remarks>
-/// Parameter <c>Name</c> = Vietnamese name, <c>NameEn</c> = English name (null → <c>Name</c> is used for both).
+/// <c>NameKey</c> set → <c>Name</c> is the translation of that key (Lang); otherwise <c>Name</c> is used as-is (key / technical names).
 /// The <c>Name</c> property picks by <see cref="Lang.Current"/> when read; equality (record) does not depend on the language.
 /// </remarks>
-public sealed record KeymapAction(KeymapActionKind Kind, string Name, string Short, KeymapEntry Entry, string? NameEn = null)
+public sealed record KeymapAction(KeymapActionKind Kind, string Name, string Short, KeymapEntry Entry, string? NameKey = null)
 {
-    private readonly string _nameVi = Name;
+    private readonly string _name = Name;
 
     public string Name
     {
-        get => NameEn is null ? _nameVi : Lang.T(_nameVi, NameEn);
-        init => _nameVi = value;
+        get => NameKey is null ? _name : Lang.T(NameKey);
+        init => _name = value;
     }
 
     public override string ToString() => Name;
@@ -53,13 +53,13 @@ public static class KeymapActions
     /// <summary>Mouse, type 01 (capture 13: left button = 01 01 01 00; ❓ meaning of p2).</summary>
     public static readonly IReadOnlyList<KeymapAction> Mouse =
     [
-        new(KeymapActionKind.Mouse, "Chuột: nút trái", "🖱 L", new(0x01, 0x01, 0x01, 0x00), NameEn: "Mouse: left button"),
+        new(KeymapActionKind.Mouse, "Mouse: left button", "🖱 L", new(0x01, 0x01, 0x01, 0x00), NameKey: "actions.mouse_left"),
     ];
 
     /// <summary>The vendor app's Commands tab (capture 15: lock PC = Win + L, key in p2).</summary>
     public static readonly IReadOnlyList<KeymapAction> Commands =
     [
-        new(KeymapActionKind.Command, "Khóa máy (Win + L)", "🔒 Lock", new(0x00, ModWin, 0x0F, 0x00), NameEn: "Lock PC (Win + L)"),
+        new(KeymapActionKind.Command, "Lock PC (Win + L)", "🔒 Lock", new(0x00, ModWin, 0x0F, 0x00), NameKey: "actions.lock_pc"),
     ];
 
     public static IEnumerable<KeymapAction> FixedActions => Modifiers.Concat(Media).Concat(Mouse).Concat(Commands);
@@ -69,9 +69,7 @@ public static class KeymapActions
     {
         var e = new KeymapEntry(0x00, modifiers, 0x00, key);
         if (!IsCombo(e))
-            throw new UnsafeCommandException(Lang.T(
-                $"Tổ hợp không hợp lệ: modifier 0x{modifiers:X2} (chỉ Ctrl/Shift/Alt/Win trái), phím 0x{key:X2}.",
-                $"Invalid combo: modifier 0x{modifiers:X2} (left Ctrl/Shift/Alt/Win only), key 0x{key:X2}."));
+            throw new UnsafeCommandException(Lang.T("actions.invalid_combo_modifier_0x_left", modifiers, key));
         return e;
     }
 
@@ -107,5 +105,5 @@ public static class KeymapActions
         IsKey(e) ? $"{HidUsages.Name(e.Code)} (0x{e.Code:X2})"
         : IsCombo(e) ? $"{ModifierText(e.P1)} + {HidUsages.Name(e.Code)} ({e})"
         : FixedActions.FirstOrDefault(a => a.Entry == e) is { } a ? $"{a.Name} ({e})"
-        : e.IsEmpty ? Lang.T("(trống — mặc định firmware)", "(empty — firmware default)") : Lang.T($"mặc định {e}", $"default {e}");
+        : e.IsEmpty ? Lang.T("actions.empty_firmware_default") : Lang.T("actions.default", e);
 }

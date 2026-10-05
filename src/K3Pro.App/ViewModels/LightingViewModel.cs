@@ -22,9 +22,9 @@ public partial class EffectItem(LightingEffect effect) : ObservableObject
     public string Tooltip => Effect switch
     {
         { IsCaptured: true, Mode: { } m } => $"0x0A = 0x{m:X2} · capture {Effect.Source}" +
-                                            (IsCurrent ? T(" · đang dùng trên thiết bị", " · active on the device") : ""),
-        { Mode: not null } => T("🔒 Self-define cần lệnh 02 (màu từng phím) — chưa hỗ trợ", "🔒 Self-define needs command 02 (per-key colors) — not supported"),
-        _ => T("🔒 Chưa có capture", "🔒 No capture yet"),
+                                            (IsCurrent ? T("lighting.active_device") : ""),
+        { Mode: not null } => T("lighting.self_define_needs_command_02"),
+        _ => T("lighting.no_capture_yet"),
     };
 
     /// <summary>Selected for Apply.</summary>
@@ -89,14 +89,14 @@ public partial class LightingViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(SpeedText))]
     public partial int EffectSpeed { get; set; }
 
-    public string BrightnessText => T("Độ sáng", "Brightness") + $" {EffectBrightness}/{LevelMax}" + DeviceLevelNote(s => s.Brightness, EffectBrightness);
+    public string BrightnessText => T("lighting.brightness") + $" {EffectBrightness}/{LevelMax}" + DeviceLevelNote(s => s.Brightness, EffectBrightness);
 
-    public string SpeedText => T("Tốc độ", "Speed") + $" {EffectSpeed}/{LevelMax}" + DeviceLevelNote(s => s.Speed, EffectSpeed);
+    public string SpeedText => T("lighting.speed") + $" {EffectSpeed}/{LevelMax}" + DeviceLevelNote(s => s.Speed, EffectSpeed);
 
     /// <summary>Device value outside 0..4 (e.g. 07 set by the knob ❓) → show a note; not overwritten unless the slider is moved.</summary>
     private string DeviceLevelNote(Func<Settings, Func<byte, byte>> read, int shown) =>
         _settings is { } s && SelectedEffect?.Effect.Mode is { } m && read(s)(m) is var raw && raw != shown
-            ? T($" (thiết bị: {raw} ❓)", $" (device: {raw} ❓)")
+            ? T("lighting.device", raw)
             : "";
 
     partial void OnEffectBrightnessChanged(int value)
@@ -126,7 +126,7 @@ public partial class LightingViewModel : ObservableObject
 
     public int CapturedEffectCount => Effects.Count(e => e.IsEnabled);
 
-    public string EffectsSummary => T($"{CapturedEffectCount}/{Effects.Count} hiệu ứng dùng được", $"{CapturedEffectCount}/{Effects.Count} effects available");
+    public string EffectsSummary => T("lighting.effects_available", CapturedEffectCount, Effects.Count);
 
     /// <summary>Default palette from the capture (slots 8–14). Rebuilt on language switch (color names).</summary>
     [ObservableProperty]
@@ -134,13 +134,13 @@ public partial class LightingViewModel : ObservableObject
 
     private static IReadOnlyList<ColorPreset> BuildPresets() =>
     [
-        new(T("Đỏ", "Red"), Color.FromRgb(0xFF, 0x00, 0x00)),
-        new(T("Xanh dương", "Blue"), Color.FromRgb(0x00, 0x00, 0xFF)),
-        new(T("Xanh lá", "Green"), Color.FromRgb(0x00, 0xFF, 0x00)),
-        new(T("Vàng", "Yellow"), Color.FromRgb(0xFF, 0xFF, 0x00)),
-        new(T("Tím", "Magenta"), Color.FromRgb(0xFF, 0x00, 0xFF)),
+        new(T("lighting.red"), Color.FromRgb(0xFF, 0x00, 0x00)),
+        new(T("lighting.blue"), Color.FromRgb(0x00, 0x00, 0xFF)),
+        new(T("lighting.green"), Color.FromRgb(0x00, 0xFF, 0x00)),
+        new(T("lighting.yellow"), Color.FromRgb(0xFF, 0xFF, 0x00)),
+        new(T("lighting.magenta"), Color.FromRgb(0xFF, 0x00, 0xFF)),
         new("Cyan", Color.FromRgb(0x00, 0xFF, 0xFF)),
-        new(T("Trắng", "White"), Color.FromRgb(0xFF, 0xFF, 0xFF)),
+        new(T("lighting.white"), Color.FromRgb(0xFF, 0xFF, 0xFF)),
     ];
 
     // Latest mode read (null = not read yet); display text follows the current language.
@@ -155,10 +155,10 @@ public partial class LightingViewModel : ObservableObject
     [ObservableProperty]
     public partial string HexInput { get; set; }
 
-    public string ModeText => _modeReadFailed ? T("không đọc được", "read failed")
-        : _mode is { } m ? $"0x{m:X2} ({LightingModes.Describe(m)})" : T("chưa đọc", "not read");
+    public string ModeText => _modeReadFailed ? T("lighting.read_failed")
+        : _mode is { } m ? $"0x{m:X2} ({LightingModes.Describe(m)})" : T("device.not_read");
 
-    public string ModeLine => T($"Mode hiện tại (0x84, offset 0x0A): {ModeText}", $"Current mode (0x84, offset 0x0A): {ModeText}");
+    public string ModeLine => T("lighting.current_mode_0x84_offset_0x0a", ModeText);
 
     /// <summary>Language switch: rebuilds the color names + mode text.</summary>
     public void RefreshLanguage()
@@ -281,7 +281,7 @@ public partial class LightingViewModel : ObservableObject
         catch (Exception ex)
         {
             SetMode(null, true);
-            _log.Error(T($"Đọc 0x84 lỗi: {ex.Message}", $"Reading 0x84 failed: {ex.Message}"));
+            _log.Error(T("device.reading_0x84_failed", ex.Message));
             return null;
         }
     }

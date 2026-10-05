@@ -54,11 +54,9 @@ public sealed class Settings
     public static Settings Parse(ReadOnlySpan<byte> data)
     {
         if (data.Length != Length)
-            throw new InvalidDataException(Lang.T($"Settings phải dài {Length} byte (nhận {data.Length}).",
-                $"Settings must be {Length} bytes (got {data.Length})."));
+            throw new InvalidDataException(Lang.T("settings.settings_must_be_bytes_got", Length, data.Length));
         if (!data[MagicOffset..].SequenceEqual(Magic))
-            throw new InvalidDataException(Lang.T($"Settings sai magic: {Hex.Format(data[MagicOffset..])} (cần 5A A5).",
-                $"Settings has wrong magic: {Hex.Format(data[MagicOffset..])} (expected 5A A5)."));
+            throw new InvalidDataException(Lang.T("settings.settings_has_wrong_magic_expected", Hex.Format(data[MagicOffset..])));
         return new(data.ToArray());
     }
 
@@ -74,7 +72,7 @@ public sealed class Settings
 
     private static byte CheckMode(byte mode) => SpeedOffset(mode) < MagicOffset
         ? mode
-        : throw new ArgumentOutOfRangeException(nameof(mode), Lang.T($"Mode 0x{mode:X2} ngoài vùng tham số.", $"Mode 0x{mode:X2} is outside the parameter area."));
+        : throw new ArgumentOutOfRangeException(nameof(mode), Lang.T("settings.mode_0x_outside_parameter_area", mode));
 
     private Settings WithByte(int offset, byte value)
     {
@@ -113,7 +111,7 @@ public static class SleepTimes
 
     public static string Describe(byte units) => units switch
     {
-        0 => Lang.T("00 (❓ có thể OFF)", "00 (❓ possibly OFF)"),
+        0 => Lang.T("settings.00_possibly_off"),
         1 => "30 s",
         _ when units % 2 == 1 => $"{units / 2} Min 30 s",
         _ => $"{units / 2} Min",
@@ -130,10 +128,9 @@ public static class SleepTimes
             : double.Parse(t, ci) * 60;
         var units = seconds / Unit.TotalSeconds;
         if (units != Math.Floor(units))
-            throw new FormatException(Lang.T($"Sleep phải là bội số của 30 s (nhận '{text}').", $"Sleep must be a multiple of 30 s (got '{text}')."));
+            throw new FormatException(Lang.T("settings.sleep_must_be_multiple_30", text));
         if (!IsAllowed((int)units))
-            throw new UnsafeCommandException(Lang.T($"Sleep '{text}' không phải nấc của app hãng ({StopsText}).",
-                $"Sleep '{text}' is not one of the vendor app's steps ({StopsText})."));
+            throw new UnsafeCommandException(Lang.T("settings.sleep_not_one_vendor_app", text, StopsText));
         return (byte)units;
     }
 }
@@ -205,6 +202,6 @@ public static class LightingModes
     {
         Static => "static",
         _ when Find(mode) is { } e => e.Name,
-        _ => Lang.T("❓ chưa thấy trong capture", "❓ not seen in any capture"),
+        _ => Lang.T("settings.not_seen_any_capture"),
     };
 }

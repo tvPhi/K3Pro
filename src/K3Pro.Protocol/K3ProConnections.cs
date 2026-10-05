@@ -19,9 +19,7 @@ public static class K3ProConnections
         }
     }
 
-    public static string VendorAppWarning => Lang.T(
-        "⚠ App hãng (OemDrv.exe) đang chạy — nó cũng nói chuyện với receiver và có thể làm mất phản hồi. Tắt hẳn app hãng (kể cả ở khay hệ thống).",
-        "⚠ The vendor app (OemDrv.exe) is running — it also talks to the receiver and may swallow responses. Quit it completely (including from the system tray).");
+    public static string VendorAppWarning => Lang.T("connections.vendor_app_oemdrv_exe_running");
 
     public static IK3ProConnection Open(Action<TransferRecord>? log = null)
     {
@@ -40,11 +38,7 @@ public static class K3ProConnections
         {
             var status = device.ReadStatus();
             if (!status.NumpadLinked)
-                throw new IOException(Lang.T(
-                    $"Receiver 2.4G có mặt nhưng numpad chưa nối (trạng thái {status}) — numpad đang ngủ / tắt / đang ở chế độ khác? " +
-                    "Bấm một phím trên numpad rồi thử lại.",
-                    $"2.4G receiver present but the numpad is not linked (status {status}) — numpad asleep / off / in another mode? " +
-                    "Press a key on the numpad and try again."));
+                throw new IOException(Lang.T("connections.2_4g_receiver_present_but", status));
             return device;
         }
         catch

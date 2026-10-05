@@ -16,17 +16,17 @@ public sealed record LayoutConfig(double Unit, double Gap, IReadOnlyList<KeyLayo
     public static LayoutConfig Load(string path)
     {
         var config = JsonSerializer.Deserialize<LayoutConfig>(File.ReadAllText(path), Json.Options)
-                     ?? throw new InvalidDataException(T($"{path}: rỗng.", $"{path}: empty."));
+                     ?? throw new InvalidDataException(T("layout.empty", path));
         config.Validate(path);
         return config;
     }
 
     private void Validate(string source)
     {
-        if (Unit <= 0 || Gap < 0 || Gap >= Unit) throw new InvalidDataException(T($"{source}: unit/gap không hợp lệ.", $"{source}: invalid unit/gap."));
+        if (Unit <= 0 || Gap < 0 || Gap >= Unit) throw new InvalidDataException(T("layout.invalid_unit_gap", source));
         var dup = Keys.GroupBy(k => k.Index).FirstOrDefault(g => g.Count() > 1);
-        if (dup is not null) throw new InvalidDataException(T($"{source}: index {dup.Key} lặp lại.", $"{source}: index {dup.Key} is duplicated."));
+        if (dup is not null) throw new InvalidDataException(T("layout.index_duplicated", source, dup.Key));
         var bad = Keys.FirstOrDefault(k => k.Index is < 0 or >= KeymapPage.MatrixSize || k.W <= 0 || k.H <= 0);
-        if (bad is not null) throw new InvalidDataException(T($"{source}: phím index {bad.Index} không hợp lệ.", $"{source}: key index {bad.Index} is invalid."));
+        if (bad is not null) throw new InvalidDataException(T("layout.key_index_invalid", source, bad.Index));
     }
 }

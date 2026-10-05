@@ -36,33 +36,27 @@ public static class CommandGuard
     public static CommandSpec EnsureAllowed(ReadOnlySpan<byte> packet, bool expectRead)
     {
         if (packet.Length != K3ProConstants.ReportLength)
-            throw new UnsafeCommandException(Lang.T($"Gói phải dài {K3ProConstants.ReportLength} byte (nhận {packet.Length}).",
-                $"Packet must be {K3ProConstants.ReportLength} bytes (got {packet.Length})."));
+            throw new UnsafeCommandException(Lang.T("command.packet_must_be_bytes_got", K3ProConstants.ReportLength, packet.Length));
 
         var h = PacketHeader.Parse(packet);
         if (h.ReportId != K3ProConstants.ReportId)
-            throw new UnsafeCommandException(Lang.T($"Report ID 0x{h.ReportId:X2} không được phép (chỉ 0x06).",
-                $"Report ID 0x{h.ReportId:X2} not allowed (0x06 only)."));
+            throw new UnsafeCommandException(Lang.T("command.report_id_0x_not_allowed", h.ReportId));
         if (!Enum.IsDefined((Command)h.Command) || !CommandSpecs.All.TryGetValue((Command)h.Command, out var spec))
-            throw new UnsafeCommandException(Lang.T($"Lệnh 0x{h.Command:X2} chưa thấy trong capture — CẤM gửi.",
-                $"Command 0x{h.Command:X2} not seen in any capture — sending is FORBIDDEN."));
+            throw new UnsafeCommandException(Lang.T("command.command_0x_not_seen_any", h.Command));
         if (spec.IsRead != expectRead)
-            throw new UnsafeCommandException(Lang.T($"Lệnh 0x{h.Command:X2} là lệnh {(spec.IsRead ? "đọc" : "ghi")}, gọi sai đường.",
-                $"Command 0x{h.Command:X2} is a {(spec.IsRead ? "read" : "write")} command, called through the wrong path."));
+            throw new UnsafeCommandException(Lang.T("command.command_0x_command_called_through", h.Command, Lang.T(spec.IsRead ? "command.kind_read" : "command.kind_write")));
         if (!spec.Pages.Contains(h.Page))
-            throw new UnsafeCommandException(Lang.T($"Lệnh 0x{h.Command:X2} page 0x{h.Page:X2} chưa thấy trong capture.",
-                $"Command 0x{h.Command:X2} page 0x{h.Page:X2} not seen in any capture."));
+            throw new UnsafeCommandException(Lang.T("command.command_0x_page_0x_not", h.Command, h.Page));
         if (h.DataLength != spec.DataLength)
-            throw new UnsafeCommandException(Lang.T($"Lệnh 0x{h.Command:X2} len 0x{h.DataLength:X} khác capture (0x{spec.DataLength:X}).",
-                $"Command 0x{h.Command:X2} len 0x{h.DataLength:X} differs from capture (0x{spec.DataLength:X})."));
+            throw new UnsafeCommandException(Lang.T("command.command_0x_len_0x_differs", h.Command, h.DataLength, spec.DataLength));
         if (h.Unknown3 != PacketHeader.Unknown3Value || h.Unknown45 != PacketHeader.Unknown45Value)
-            throw new UnsafeCommandException(Lang.T("Byte 3–5 của header khác capture.", "Header bytes 3–5 differ from capture."));
+            throw new UnsafeCommandException(Lang.T("command.header_bytes_3_5_differ"));
 
         var tail = packet[(K3ProConstants.HeaderLength + spec.DataLength)..];
         if (tail.ContainsAnyExcept((byte)0))
-            throw new UnsafeCommandException(Lang.T("Phần pad sau data phải toàn 0.", "Padding after data must be all 0."));
+            throw new UnsafeCommandException(Lang.T("command.padding_after_data_must_be"));
         if (spec.IsRead && packet[K3ProConstants.HeaderLength..].ContainsAnyExcept((byte)0))
-            throw new UnsafeCommandException(Lang.T("Gói đọc phải có data toàn 0 (như capture).", "Read packet data must be all 0 (as in capture)."));
+            throw new UnsafeCommandException(Lang.T("command.read_packet_data_must_be"));
 
         return spec;
     }

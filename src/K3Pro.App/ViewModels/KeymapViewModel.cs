@@ -32,7 +32,7 @@ public partial class KeyViewModel : ObservableObject
 
     /// <summary>layout.json label (labelEn in English), otherwise the HID name of the default entry.</summary>
     public string DefaultLabel => (IsEnglish ? _layout.LabelEn ?? _layout.Label : _layout.Label) ??
-                                  (Baseline.IsHidUsage ? HidUsages.Name(Baseline.Code) : Baseline.IsEmpty ? T("(trống)", "(empty)") : $"❓ {Baseline}");
+                                  (Baseline.IsHidUsage ? HidUsages.Name(Baseline.Code) : Baseline.IsEmpty ? T("keymap.empty") : $"❓ {Baseline}");
     public double Left { get; }
     public double Top { get; }
     public double Width { get; }
@@ -62,18 +62,17 @@ public partial class KeyViewModel : ObservableObject
     /// <summary>Key / combo / media / mouse / command → short label; special default entries (Fn, knob, rotation) → layout label.</summary>
     public string Label => Effective == Baseline && !Baseline.IsHidUsage ? DefaultLabel : KeymapActions.ShortLabel(Effective) ?? DefaultLabel;
 
-    public string SubLabel => IsEditable ? $"#{Index} · {DefaultLabel}" : T($"#{Index} · khóa", $"#{Index} · locked");
+    public string SubLabel => IsEditable ? $"#{Index} · {DefaultLabel}" : T("keymap.locked", Index);
 
     // Long single words ("Backspace") must fit a 1-unit key without breaking mid-word.
     public double LabelFontSize => Label.Length switch { <= 5 => 14, <= 8 => 12, _ when !Label.Contains(' ') => 9.5, _ => 10.5 };
 
     public string Tooltip => IsEditable
-        ? T($"Index {Index} · mặc định {DefaultLabel} ({Baseline}) · hiện tại {Label}", $"Index {Index} · default {DefaultLabel} ({Baseline}) · current {Label}") +
-          (IsPending ? T(" (chưa Apply)", " (not applied)") : "")
+        ? T("keymap.index_default_current", Index, DefaultLabel, Baseline, Label) +
+          (IsPending ? T("keymap.not_applied") : "")
         : Baseline.IsEmpty
-            ? T($"Index {Index} · trống trong capture — khóa cho tới khi có capture app hãng ghi vào entry này",
-                $"Index {Index} · empty in the capture — locked until there is a capture of the vendor app writing this entry")
-            : T($"Index {Index} · entry đặc biệt ❓ {Baseline} — khóa", $"Index {Index} · special entry ❓ {Baseline} — locked");
+            ? T("keymap.index_empty_capture_locked_until", Index)
+            : T("keymap.index_special_entry_locked", Index, Baseline);
 
     /// <summary>Language switch: re-reads every label.</summary>
     public void RefreshTexts() => OnPropertyChanged(string.Empty);
@@ -116,8 +115,7 @@ public partial class KeymapViewModel : ObservableObject
         }
         catch (InvalidDataException ex)
         {
-            StateError = T($"Không đọc được trạng thái keymap ({ex.Message}). Đang hiển thị keymap mặc định; file cũ chưa bị ghi đè.",
-                $"Could not read the keymap state ({ex.Message}). Showing the default keymap; the old file has not been overwritten.");
+            StateError = T("keymap.could_not_read_keymap_state", ex.Message);
             _log.Error(StateError);
         }
         SyncAppliedToKeys();
@@ -163,8 +161,8 @@ public partial class KeymapViewModel : ObservableObject
     public partial HidUsage? ComboKey { get; set; }
 
     public string ComboHint => ComboMask == 0
-        ? T("Chọn ít nhất một modifier, rồi chọn phím.", "Pick at least one modifier, then a key.")
-        : ComboKey is { } k ? $"{KeymapActions.ModifierText(ComboMask)} + {k.Name}" : $"{KeymapActions.ModifierText(ComboMask)} + … {T("(chọn phím)", "(pick a key)")}";
+        ? T("keymap.pick_at_least_one_modifier")
+        : ComboKey is { } k ? $"{KeymapActions.ModifierText(ComboMask)} + {k.Name}" : $"{KeymapActions.ModifierText(ComboMask)} + … {T("keymap.pick_key")}";
 
     private byte ComboMask => (byte)((ComboCtrl ? KeymapActions.ModCtrl : 0) | (ComboShift ? KeymapActions.ModShift : 0) |
                                      (ComboAlt ? KeymapActions.ModAlt : 0) | (ComboWin ? KeymapActions.ModWin : 0));
@@ -172,7 +170,7 @@ public partial class KeymapViewModel : ObservableObject
     public double CanvasHeight { get; }
     public string? LayoutError { get; }
     public string StatePath => _store.Path;
-    public string StatePathText => T($"Trạng thái: {_store.Path}", $"State: {_store.Path}");
+    public string StatePathText => T("keymap.state", _store.Path);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SelectedTitle), nameof(SelectedDetail), nameof(CanEditSelected), nameof(SelectedLabel), nameof(SelectedIsPending))]
@@ -192,12 +190,12 @@ public partial class KeymapViewModel : ObservableObject
 
     public int PendingCount => Keys.Count(k => k.IsPending);
     public bool HasPending => PendingCount > 0;
-    public string ApplyText => HasPending ? T($"Apply ({PendingCount} thay đổi)", $"Apply ({PendingCount} change{(PendingCount == 1 ? "" : "s")})") : "Apply";
+    public string ApplyText => !HasPending ? T("keymap.apply") : PendingCount == 1 ? T("keymap.apply_one_change") : T("keymap.apply_changes", PendingCount);
     public bool CanEditSelected => SelectedKey is { IsEditable: true };
 
     public string SelectedTitle => SelectedKey is { } k
-        ? T($"Phím #{k.Index} — {k.DefaultLabel}", $"Key #{k.Index} — {k.DefaultLabel}")
-        : T("Chọn một phím trên layout", "Select a key on the layout");
+        ? T("keymap.key", k.Index, k.DefaultLabel)
+        : T("keymap.select_key_layout");
 
     /// <summary>Large label of the current function (including changes not applied yet).</summary>
     public string SelectedLabel => SelectedKey?.Label ?? "—";
@@ -206,14 +204,13 @@ public partial class KeymapViewModel : ObservableObject
 
     public string SelectedDetail => SelectedKey switch
     {
-        null => T("Bấm vào phím để đổi. Thay đổi chỉ gửi khi bấm Apply.", "Click a key to change it. Changes are only sent when you press Apply."),
-        { IsEditable: false, Baseline.IsEmpty: true } => T("Entry trống trong capture — khóa cho tới khi có capture.", "Empty entry in the capture — locked until there is a capture."),
-        { IsEditable: false } k => T($"Entry đặc biệt ❓ ({k.Baseline}) chưa giải mã — khóa, không cho sửa.", $"Special entry ❓ ({k.Baseline}) not decoded yet — locked."),
-        var k => T($"Hiện tại: {Describe(k, k.Applied)} · Mặc định: {Describe(k, k.Baseline)}", $"Current: {Describe(k, k.Applied)} · Default: {Describe(k, k.Baseline)}") +
-                 (k.IsPending ? T($" · Sẽ đổi thành: {Describe(k, k.Pending!.Value)}", $" · Will change to: {Describe(k, k.Pending!.Value)}") : "") +
+        null => T("keymap.click_key_change_changes_are"),
+        { IsEditable: false, Baseline.IsEmpty: true } => T("keymap.empty_entry_capture_locked_until"),
+        { IsEditable: false } k => T("keymap.special_entry_not_decoded_yet", k.Baseline),
+        var k => T("keymap.current_default", Describe(k, k.Applied), Describe(k, k.Baseline)) +
+                 (k.IsPending ? T("keymap.will_change", Describe(k, k.Pending!.Value)) : "") +
                  (KeymapRules.CapturedSpecialEntries.TryGetValue(k.Index, out var note)
-                     ? T($"\nℹ {note}. Gán phím khác sẽ thay chức năng mặc định; \"Về mặc định\" ghi lại đúng giá trị app hãng.",
-                         $"\nℹ {note}. Assigning something else replaces the default function; \"Default\" writes back the exact vendor value.")
+                     ? T("keymap.assigning_something_else_replaces_defaul", note)
                      : ""),
     };
 
@@ -252,7 +249,7 @@ public partial class KeymapViewModel : ObservableObject
         WritePlan plan;
         try
         {
-            plan = WritePlanner.Keymap(KeymapRules.Apply(Page, _applied), KeymapRules.Apply(Page, target), $"{_store.Path} {T("(trạng thái app)", "(app state)")}");
+            plan = WritePlanner.Keymap(KeymapRules.Apply(Page, _applied), KeymapRules.Apply(Page, target), $"{_store.Path} {T("keymap.app_state")}");
         }
         catch (UnsafeCommandException ex)
         {
@@ -271,7 +268,7 @@ public partial class KeymapViewModel : ObservableObject
     private async Task ResetToDefaultAsync()
     {
         var plan = WritePlanner.Keymap(KeymapRules.Apply(Page, _applied), CaptureBaseline.KeymapPage(Page),
-            $"{_store.Path} {T("(trạng thái app)", "(app state)")}", force: true);
+            $"{_store.Path} {T("keymap.app_state")}", force: true);
         if (await _writer.ApplyAsync(plan) == ApplyResult.Applied) Commit([]);
     }
 
@@ -282,8 +279,7 @@ public partial class KeymapViewModel : ObservableObject
         IsCapturing = false;
         if (!KeymapRules.IsAllowedHidUsage(hidUsage))
         {
-            _log.Warning(T($"{HidUsages.Name(hidUsage)} (0x{hidUsage:X2}) chưa được hỗ trợ — chưa có capture.",
-                $"{HidUsages.Name(hidUsage)} (0x{hidUsage:X2}) is not supported yet — no capture."));
+            _log.Warning(T("keymap.0x_not_supported_yet_no", HidUsages.Name(hidUsage), hidUsage));
             return true;
         }
         SearchText = "";
@@ -299,8 +295,7 @@ public partial class KeymapViewModel : ObservableObject
         IsCapturing = false;
         if (KeymapActions.Modifiers.FirstOrDefault(m => m.Entry.P1 == modifier) is not { } action)
         {
-            _log.Warning(T($"Modifier 0x{modifier:X2} (phím bên phải) chưa có capture — mới hỗ trợ LCtrl / LShift / LAlt / LWin.",
-                $"Modifier 0x{modifier:X2} (right-side key) has no capture yet — only LCtrl / LShift / LAlt / LWin are supported."));
+            _log.Warning(T("keymap.modifier_0x_right_side_key", modifier));
             return true;
         }
         SetPending(k, action.Entry);
@@ -375,8 +370,7 @@ public partial class KeymapViewModel : ObservableObject
         }
         catch (IOException ex)
         {
-            StateError = T($"Đã ghi thiết bị nhưng KHÔNG lưu được {_store.Path}: {ex.Message}",
-                $"Written to the device but could NOT save {_store.Path}: {ex.Message}");
+            StateError = T("keymap.written_device_but_could_not", _store.Path, ex.Message);
             _log.Error(StateError);
         }
         foreach (var k in Keys) k.Pending = null;

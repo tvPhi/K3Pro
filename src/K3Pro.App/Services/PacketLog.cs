@@ -44,7 +44,7 @@ public sealed class PacketLog(string? logDir)
         var summary = r.Direction is TransferDirection.Out or TransferDirection.In
             ? Protocol.Wireless.ReceiverFrame.Describe(r.Data)
             : r.Data.Length >= K3ProConstants.HeaderLength ? PacketHeader.Parse(r.Data).ToString() : "";
-        if (r.Error is not null) summary += $" — {K3Pro.Protocol.Lang.T("LỖI", "ERROR")}: {r.Error.Message}";
+        if (r.Error is not null) summary += $" — {K3Pro.Protocol.Lang.T("packetlog.error")}: {r.Error.Message}";
         Add(r.Error is null ? dir : LogKind.Error, $"{dir.ToString().ToUpperInvariant()} {summary}".TrimEnd(), r.Data, fileOnly);
     }
 
@@ -54,7 +54,7 @@ public sealed class PacketLog(string? logDir)
         int end = data.Length;
         while (end > 1 && data[end - 1] == 0) end--;
         var hex = Hex.Format(data.AsSpan(0, end));
-        return end < data.Length ? $"{hex}  …(+{data.Length - end} × 00, {K3Pro.Protocol.Lang.T($"tổng {data.Length} byte", $"{data.Length} bytes total")})" : hex;
+        return end < data.Length ? $"{hex}  …(+{data.Length - end} × 00, {K3Pro.Protocol.Lang.T("packetlog.bytes_total", data.Length)})" : hex;
     }
 
     private void AppendToFile(LogEntry e)

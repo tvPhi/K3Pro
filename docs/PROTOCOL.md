@@ -207,6 +207,9 @@ The file is only read, never copied into the repo. What matches the captures:
   the receiver answers on interrupt IN ep2: `13 07 01 00 01 00 … 00 1C` (capture 01). ✅
 - Last byte = 8-bit sum of the preceding bytes (`13+07+01 = 1B`, `13+07+01+01 = 1C`) — matches 2/2 samples ❓.
 - `07 01` = status query, answered by the receiver itself (the numpad does not need to be awake): **response byte 5 = `01` when the numpad is connected via 2.4G, `00` when the numpad is asleep / off / wired** ✅ (K3Pro.App polls with this command every 3 s and reconnects automatically when the numpad wakes up — confirmed by the author 2026-10-02). Command `05` requires the numpad to be awake (asleep → no response).
+- LEDs in 2.4G mode: they turn off after ~5 s without a key press and come back on the next key press; wired they stay on
+  (observed by the author, 2026-10-05; same behaviour since day one) → firmware power saving. The vendor app has no setting for it
+  (nothing in text.xml or the OemDrv.exe strings), so no capture can reveal a byte for it → not configurable; K3Pro writes nothing for it.
 - Configuration over the receiver ✅ (captures 21–25, 33/34, batch 6): see the frame table above — `44` read settings, `04` write settings,
   `01` keymap pages 0–2, `09` color table; each write frame is echoed by the receiver.
 

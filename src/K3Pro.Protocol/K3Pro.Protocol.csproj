@@ -8,4 +8,9 @@
     <InternalsVisibleTo Include="K3Pro.Protocol.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Translations: one file per language (Lang.cs). New languages: add xx.json here, or drop it into a lang/ folder at runtime. -->
+    <EmbeddedResource Include="Localization\*.json" LogicalName="K3Pro.Lang.%(Filename).json" />
+  </ItemGroup>
+
 </Project>

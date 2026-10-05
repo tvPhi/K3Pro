@@ -10,7 +10,7 @@ public class ModelTests
     [InlineData("en-US", UiLanguage.En)]
     [InlineData("nb-NO", UiLanguage.En)]
     [InlineData("", UiLanguage.En)] // invariant
-    public void Os_language_vietnamese_or_else_english(string culture, UiLanguage expected) =>
+    public void Os_language_vietnamese_or_else_english(string culture, string expected) =>
         Assert.Equal(expected, Lang.FromCulture(CultureInfo.GetCultureInfo(culture)));
 
     [Theory]

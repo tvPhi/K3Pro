@@ -9,7 +9,7 @@ public readonly record struct Rgb(byte R, byte G, byte B)
     {
         var hex = s.StartsWith('#') ? s[1..] : s;
         if (hex.Length != 6 || !int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var v))
-            throw new FormatException(Lang.T($"Màu phải dạng RRGGBB (nhận '{s}').", $"Color must be RRGGBB (got '{s}')."));
+            throw new FormatException(Lang.T("colortable.color_must_be_rrggbb_got", s));
         return new((byte)(v >> 16), (byte)(v >> 8), (byte)v);
     }
 
@@ -39,8 +39,7 @@ public sealed class ColorTable
     public static ColorTable Parse(ReadOnlySpan<byte> data)
     {
         if (data.Length != ByteLength)
-            throw new InvalidDataException(Lang.T($"Bảng màu phải dài {ByteLength} byte (nhận {data.Length}).",
-                $"Color table must be {ByteLength} bytes (got {data.Length})."));
+            throw new InvalidDataException(Lang.T("colortable.color_table_must_be_bytes", ByteLength, data.Length));
         var colors = new Rgb[ColorCount];
         for (int i = 0; i < ColorCount; i++)
             colors[i] = new(data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);

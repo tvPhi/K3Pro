@@ -42,20 +42,17 @@ public sealed class HidSharpReceiverTransport : IReceiverTransport
         var candidates = FindCandidates();
         if (candidates.Count != 1)
             throw new IOException(candidates.Count == 0
-                ? Lang.T($"Không thấy interface lệnh của receiver {K3ProConstants.WirelessVendorId:X4}:{K3ProConstants.WirelessProductId:X4}.",
-                    $"Command interface of receiver {K3ProConstants.WirelessVendorId:X4}:{K3ProConstants.WirelessProductId:X4} not found.")
-                : Lang.T($"Có {candidates.Count} interface receiver khớp — không chắc chọn đúng, dừng lại.",
-                    $"{candidates.Count} matching receiver interfaces — not sure which one is right, stopping."));
+                ? Lang.T("receivertransport.command_interface_receiver_not_found", K3ProConstants.WirelessVendorId, K3ProConstants.WirelessProductId)
+                : Lang.T("receivertransport.matching_receiver_interfaces_not_sure", candidates.Count));
         var device = candidates[0];
         if (!device.TryOpen(out var stream))
-            throw new IOException(Lang.T($"Không mở được {device.DevicePath} (app hãng đang chạy?).",
-                $"Could not open {device.DevicePath} (is the vendor app running?)."));
+            throw new IOException(Lang.T("transport.could_not_open_vendor_app", device.DevicePath));
         return new HidSharpReceiverTransport(device, stream);
     }
 
     public void Write(byte[] frame)
     {
-        if (frame.Length != ReceiverFrame.Length) throw new ArgumentException(Lang.T("Khung phải dài 20 byte.", "Frame must be 20 bytes."), nameof(frame));
+        if (frame.Length != ReceiverFrame.Length) throw new ArgumentException(Lang.T("receivertransport.frame_must_be_20_bytes"), nameof(frame));
         _stream.Write(frame);
     }
 

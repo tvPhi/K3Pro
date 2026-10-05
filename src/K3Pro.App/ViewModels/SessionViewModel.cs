@@ -23,7 +23,7 @@ public partial class SessionViewModel : ObservableObject
 
     public SessionViewModel()
     {
-        ConnectionText = T("Chưa kết nối", "Not connected");
+        ConnectionText = T("session.not_connected");
         InfoText = "";
     }
 
@@ -64,8 +64,7 @@ public partial class SessionViewModel : ObservableObject
 
     public bool IsWriteBlocked => WriteBlockedText is not null;
 
-    public string BatteryTip => T("Pin (Bluetooth) — hệ điều hành đọc từ BLE Battery Service, app không gửi gì xuống numpad",
-        "Battery (Bluetooth) — read by the OS from the BLE Battery Service; the app sends nothing to the numpad");
+    public string BatteryTip => T("session.battery_bluetooth_read_os_from");
 
     /// <summary>Language switch: rebuilds the status text from the current connection.</summary>
     public void RefreshLanguage()
@@ -88,21 +87,18 @@ public partial class SessionViewModel : ObservableObject
         DevicePath = state.DevicePath;
         IsWireless = state.Kind == K3Pro.Protocol.ConnectionKind.Wireless;
         ConnectionText = state.IsConnected
-            ? IsWireless ? T("Đã kết nối qua 2.4G (receiver 3554:FA09)", "Connected via 2.4G (receiver 3554:FA09)")
-                         : T("Đã kết nối có dây 258A:010C", "Connected by cable 258A:010C")
+            ? IsWireless ? T("session.connected_via_2_4g_receiver")
+                         : T("session.connected_cable_258a_010c")
             : _bluetooth.Connected
-                ? T("Đang dùng Bluetooth (K3PRO 5.0) — chỉ chỉnh được khi cắm dây hoặc qua 2.4G",
-                    "Using Bluetooth (K3PRO 5.0) — settings can be changed over the cable or 2.4G only")
-                : state.Error is { } e ? T($"Chưa kết nối — {e}", $"Not connected — {e}") : T("Chưa kết nối (cắm dây numpad)", "Not connected (plug in the numpad)");
+                ? T("session.using_bluetooth_k3pro_5_0")
+                : state.Error is { } e ? T("session.not_connected_2", e) : T("session.not_connected_plug_numpad");
         IsBluetoothOnly = !state.IsConnected && _bluetooth.Connected;
         WriteBlockedText = state.IsConnected ? null
             : IsBluetoothOnly
-                ? T("Đang dùng Bluetooth — numpad không cho chỉnh keymap / đèn / sleep qua Bluetooth. Cắm dây hoặc chuyển sang 2.4G để chỉnh.",
-                    "On Bluetooth — the numpad can't be configured over Bluetooth (keymap / lighting / sleep). Plug in the cable or switch to 2.4G to change settings.")
-                : T("Chưa kết nối numpad — cắm dây hoặc bật 2.4G (bấm một phím cho numpad thức) để chỉnh.",
-                    "Numpad not connected — plug in the cable or use 2.4G (press a key to wake the numpad) to change settings.");
+                ? T("session.bluetooth_numpad_can_t_be")
+                : T("session.numpad_not_connected_plug_cable");
         InfoText = state.Info is { } info
-            ? $"{(IsWireless ? "0x05" : "0x82")}: {info} {(info.MatchesCapture ? "✅" : T("⚠ khác capture", "⚠ differs from capture"))}"
+            ? $"{(IsWireless ? "0x05" : "0x82")}: {info} {(info.MatchesCapture ? "✅" : T("session.differs_from_capture"))}"
             : "";
     }
 }

@@ -19,8 +19,7 @@ public sealed class DeviceInfo
     public static DeviceInfo Parse(ReadOnlySpan<byte> data)
     {
         if (data.Length != Length)
-            throw new InvalidDataException(Lang.T($"DeviceInfo phải dài {Length} byte (nhận {data.Length}).",
-                $"DeviceInfo must be {Length} bytes (got {data.Length})."));
+            throw new InvalidDataException(Lang.T("deviceinfo.deviceinfo_must_be_bytes_got", Length, data.Length));
         return new(data.ToArray());
     }
 

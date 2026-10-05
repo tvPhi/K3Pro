@@ -14,7 +14,7 @@ public readonly record struct PacketHeader(byte ReportId, byte Command, byte Pag
     public static PacketHeader Parse(ReadOnlySpan<byte> packet)
     {
         if (packet.Length < K3ProConstants.HeaderLength)
-            throw new InvalidDataException(Lang.T($"Gói ngắn hơn header ({packet.Length} byte).", $"Packet shorter than header ({packet.Length} bytes)."));
+            throw new InvalidDataException(Lang.T("header.packet_shorter_than_header_bytes", packet.Length));
         return new(packet[0], packet[1], packet[2], packet[3],
             BinaryPrimitives.ReadUInt16LittleEndian(packet[4..]),
             BinaryPrimitives.ReadUInt16LittleEndian(packet[6..]));

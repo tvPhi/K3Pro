@@ -38,8 +38,7 @@ public partial class DeviceViewModel : ObservableObject
     public string KeymapStatePath { get; }
     public string LayoutPath { get; }
     public string DataDir { get; }
-    public string DelayText => T($"{K3ProConstants.DefaultInterPacketDelay.TotalMilliseconds:0} ms giữa các gói",
-        $"{K3ProConstants.DefaultInterPacketDelay.TotalMilliseconds:0} ms between packets");
+    public string DelayText => T("device.ms_between_packets", K3ProConstants.DefaultInterPacketDelay.TotalMilliseconds);
 
     [ObservableProperty]
     public partial string SettingsDump { get; private set; } = "";
@@ -62,9 +61,9 @@ public partial class DeviceViewModel : ObservableObject
         set => SleepStopIndex = SleepTimes.NearestStopIndex(value);
     }
 
-    public string DeviceSleepText => _deviceSleep is { } u ? $"0x{u:X2} = {SleepTimes.Describe(u)}" : T("chưa đọc", "not read");
+    public string DeviceSleepText => _deviceSleep is { } u ? $"0x{u:X2} = {SleepTimes.Describe(u)}" : T("device.not_read");
 
-    public string DeviceSleepLine => T($"Thiết bị (offset 0x18): {DeviceSleepText}", $"Device (offset 0x18): {DeviceSleepText}");
+    public string DeviceSleepLine => T("device.device_offset_0x18", DeviceSleepText);
 
     /// <summary>Language switch: rebuilds all text from the data already read.</summary>
     public void RefreshLanguage()
@@ -87,7 +86,7 @@ public partial class DeviceViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            _log.Error(T($"Đọc 0x84 lỗi: {ex.Message}", $"Reading 0x84 failed: {ex.Message}"));
+            _log.Error(T("device.reading_0x84_failed", ex.Message));
             return;
         }
 
@@ -123,7 +122,7 @@ public partial class DeviceViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            _log.Error(T($"Đọc 0x84 lỗi: {ex.Message}", $"Reading 0x84 failed: {ex.Message}"));
+            _log.Error(T("device.reading_0x84_failed", ex.Message));
             return;
         }
 
@@ -140,7 +139,7 @@ public partial class DeviceViewModel : ObservableObject
     {
         if (_raw is not { } raw)
         {
-            SettingsDump = T("(chưa đọc — bấm \"Đọc 0x84\")", "(not read — press \"Read 0x84\")");
+            SettingsDump = T("device.not_read_press_read_0x84");
             FieldsText = "";
             ReferenceText = "";
             return null;
@@ -151,14 +150,14 @@ public partial class DeviceViewModel : ObservableObject
         {
             var s = Settings.Parse(raw);
             FieldsText = $"0x{Settings.LightingModeOffset:X2}  LightingMode = 0x{s.LightingMode:X2} ({LightingModes.Describe(s.LightingMode)})\n" +
-                         $"0x{Settings.SleepOffset:X2}  Sleep = 0x{s.SleepUnits:X2} ({SleepTimes.Describe(s.SleepUnits)}, {T("chế độ 2.4G", "2.4G mode")})\n" +
+                         $"0x{Settings.SleepOffset:X2}  Sleep = 0x{s.SleepUnits:X2} ({SleepTimes.Describe(s.SleepUnits)}, {T("device.2_4g_mode")})\n" +
                          $"0x{Settings.MagicOffset:X2}  magic = {Hex.Format(raw.AsSpan(Settings.MagicOffset))} ✅\n" +
-                         T("Các byte khác: ❓ chưa rõ ý nghĩa (giữ nguyên khi ghi).", "Other bytes: ❓ meaning unknown (kept unchanged when writing).");
+                         T("device.other_bytes_meaning_unknown_kept");
             var reference = CaptureBaseline.ReferenceSettings();
             var diff = Hex.DiffRanges(reference.Data, s.Data);
             ReferenceText = diff.Count == 0
-                ? T($"Giống hệt block đọc trong {CaptureBaseline.SettingsSource}.", $"Identical to the block read in {CaptureBaseline.SettingsSource}.")
-                : T($"Khác {CaptureBaseline.SettingsSource} ở: ", $"Differs from {CaptureBaseline.SettingsSource} at: ") + string.Join(", ", diff.Select(r =>
+                ? T("device.identical_block_read", CaptureBaseline.SettingsSource)
+                : T("device.differs_from_at", CaptureBaseline.SettingsSource) + string.Join(", ", diff.Select(r =>
                     $"0x{r.Start:X2} ({Hex.Format(reference.Data[r.Start..r.End])} → {Hex.Format(s.Data[r.Start..r.End])})"));
             return s;
         }
@@ -183,7 +182,7 @@ public partial class DeviceViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            _log.Error(T($"Không mở được {DataDir}: {ex.Message}", $"Could not open {DataDir}: {ex.Message}"));
+            _log.Error(T("device.could_not_open", DataDir, ex.Message));
         }
     }
 }

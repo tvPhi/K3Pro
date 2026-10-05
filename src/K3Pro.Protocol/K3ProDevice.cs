@@ -44,8 +44,7 @@ public sealed class K3ProDevice(IHidTransport transport, TimeSpan? interPacketDe
         foreach (var write in plan.Writes)
         {
             if (write.ExpectedSettings is { } expected && !ReadSettings().Data.SequenceEqual(expected.Data))
-                throw new InvalidOperationException(Lang.T("Block settings trên thiết bị đã đổi từ lúc lập kế hoạch — hủy, hãy làm lại.",
-                    "The device's settings block changed since the plan was made — cancelled, please try again."));
+                throw new InvalidOperationException(Lang.T("wired.device_s_settings_block_changed"));
 
             SendCommand(write.Packet);
             onSent?.Invoke(write);
@@ -54,7 +53,7 @@ public sealed class K3ProDevice(IHidTransport transport, TimeSpan? interPacketDe
             {
                 var written = write.Packet.AsSpan(K3ProConstants.HeaderLength, Settings.Length);
                 if (!ReadSettings().Data.SequenceEqual(written))
-                    throw new InvalidDataException(Lang.T("Đọc lại 0x84 khác block vừa ghi.", "0x84 read-back differs from the block just written."));
+                    throw new InvalidDataException(Lang.T("wired.0x84_read_back_differs_from"));
             }
         }
     }
@@ -69,12 +68,11 @@ public sealed class K3ProDevice(IHidTransport transport, TimeSpan? interPacketDe
         Transfer(() => response = transport.GetFeature(K3ProConstants.ReportId));
 
         if (response.Length < K3ProConstants.HeaderLength + spec.DataLength)
-            throw new InvalidDataException(Lang.T($"Phản hồi quá ngắn ({response.Length} byte).", $"Response too short ({response.Length} bytes)."));
+            throw new InvalidDataException(Lang.T("wired.response_too_short_bytes", response.Length));
         var expected = request.AsSpan(0, K3ProConstants.HeaderLength);
         var echoed = response.AsSpan(0, K3ProConstants.HeaderLength);
         if (!echoed.SequenceEqual(expected))
-            throw new InvalidDataException(Lang.T($"Header phản hồi {Hex.Format(echoed)} khác yêu cầu {Hex.Format(expected)}.",
-                $"Response header {Hex.Format(echoed)} differs from request {Hex.Format(expected)}."));
+            throw new InvalidDataException(Lang.T("wired.response_header_differs_from_request", Hex.Format(echoed), Hex.Format(expected)));
 
         return response.AsSpan(K3ProConstants.HeaderLength, spec.DataLength).ToArray();
     }

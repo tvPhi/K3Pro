@@ -17,7 +17,7 @@ public sealed class WriteCoordinator(IDeviceService device, PacketLog log, Actio
         foreach (var note in plan.Notes) log.Info(note);
         if (plan.IsEmpty)
         {
-            notify(T($"Không có gì thay đổi ({plan.Title}).", $"Nothing changed ({plan.Title})."), false);
+            notify(T("write.nothing_changed", plan.Title), false);
             return ApplyResult.Nothing;
         }
 
@@ -32,15 +32,15 @@ public sealed class WriteCoordinator(IDeviceService device, PacketLog log, Actio
         try
         {
             await device.ExecuteAsync(plan, kind);
-            var saved = T($"✅ Đã lưu: {plan.Title}", $"✅ Saved: {plan.Title}");
+            var saved = T("write.saved", plan.Title);
             log.Info(saved);
             notify(saved, false);
             return ApplyResult.Applied;
         }
         catch (Exception ex)
         {
-            log.Error(T($"Lưu thất bại ({plan.Title}): {ex.Message}", $"Save failed ({plan.Title}): {ex.Message}"));
-            notify(T($"Lưu thất bại: {ex.Message}", $"Save failed: {ex.Message}"), true);
+            log.Error(T("write.save_failed", plan.Title, ex.Message));
+            notify(T("write.save_failed_2", ex.Message), true);
             return ApplyResult.Failed;
         }
     }

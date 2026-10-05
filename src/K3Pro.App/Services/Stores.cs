@@ -24,7 +24,7 @@ public sealed class AppSettings
     /// <summary>null = the user hasn't chosen → follow the OS language.</summary>
     public string? Language { get; set; }
 
-    public UiLanguage ResolveLanguage(UiLanguage systemLanguage) => Language is { } code ? Lang.Parse(code) : systemLanguage;
+    public string ResolveLanguage(string systemLanguage) => Language is { } code ? Lang.Parse(code) : systemLanguage;
 }
 
 public sealed class AppSettingsStore(string path)
@@ -89,9 +89,9 @@ public sealed class KeymapStateStore(string path)
         }
         catch (JsonException ex)
         {
-            throw new InvalidDataException(T($"{path}: JSON hỏng ({ex.Message}).", $"{path}: invalid JSON ({ex.Message})."), ex);
+            throw new InvalidDataException(T("store.invalid_json", path, ex.Message), ex);
         }
-        if (state.Page != 0) throw new InvalidDataException(T($"{path}: chỉ hỗ trợ page 0.", $"{path}: only page 0 is supported."));
+        if (state.Page != 0) throw new InvalidDataException(T("store.only_page_0_supported", path));
 
         var overrides = new Dictionary<int, KeymapEntry>();
         foreach (var (index, code) in state.Overrides ?? []) overrides[index] = KeymapEntry.HidUsage(code);
@@ -99,8 +99,8 @@ public sealed class KeymapStateStore(string path)
         {
             byte[] bytes;
             try { bytes = Hex.Parse(hex); }
-            catch (FormatException ex) { throw new InvalidDataException(T($"{path}: entry #{index} '{hex}' không phải hex.", $"{path}: entry #{index} '{hex}' is not hex."), ex); }
-            if (bytes.Length != KeymapEntry.Size) throw new InvalidDataException(T($"{path}: entry #{index} phải đúng 4 byte.", $"{path}: entry #{index} must be exactly 4 bytes."));
+            catch (FormatException ex) { throw new InvalidDataException(T("store.entry_not_hex", path, index, hex), ex); }
+            if (bytes.Length != KeymapEntry.Size) throw new InvalidDataException(T("store.entry_must_be_exactly_4", path, index));
             overrides[index] = KeymapEntry.Read(bytes);
         }
         try

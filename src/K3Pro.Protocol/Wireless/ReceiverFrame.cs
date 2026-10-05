@@ -50,7 +50,7 @@ public static class ReceiverFrame
         ReceiverCommand.WriteSettings => Settings.Length,         // 128 → 10 frames
         ReceiverCommand.WriteKeymap => KeymapPage.ByteLength,      // 504 → 36 frames
         ReceiverCommand.WriteColorTable => ColorTable.ByteLength,  // 399 → 29 frames
-        _ => throw new ArgumentOutOfRangeException(nameof(command), command, Lang.T("Không phải lệnh ghi chia khung.", "Not a framed write command.")),
+        _ => throw new ArgumentOutOfRangeException(nameof(command), command, Lang.T("receiver.not_framed_write_command")),
     };
 
     public static int FrameCount(int dataLength) => (dataLength + PayloadLength - 1) / PayloadLength;
@@ -67,7 +67,7 @@ public static class ReceiverFrame
 
     public static byte[] Build(ReceiverCommand command, byte count, byte index, ReadOnlySpan<byte> payload, byte page = 0)
     {
-        if (payload.Length > PayloadLength) throw new ArgumentException(Lang.T("Payload tối đa 14 byte.", "Payload is at most 14 bytes."), nameof(payload));
+        if (payload.Length > PayloadLength) throw new ArgumentException(Lang.T("receiver.payload_at_most_14_bytes"), nameof(payload));
         if (page > 0x0F) throw new ArgumentOutOfRangeException(nameof(page));
         var frame = new byte[Length];
         frame[0] = ReportId;
@@ -87,8 +87,7 @@ public static class ReceiverFrame
     public static IReadOnlyList<byte[]> Chunked(ReceiverCommand command, ReadOnlySpan<byte> data, byte page = 0)
     {
         if (data.Length != DataLength(command))
-            throw new ArgumentException(Lang.T($"Lệnh 0x{(byte)command:X2} cần {DataLength(command)} byte (nhận {data.Length}).",
-                $"Command 0x{(byte)command:X2} needs {DataLength(command)} bytes (got {data.Length})."));
+            throw new ArgumentException(Lang.T("receiver.command_0x_needs_bytes_got", (byte)command, DataLength(command), data.Length));
         int count = FrameCount(data.Length);
         var frames = new List<byte[]>(count);
         for (int i = 0; i < count; i++)
@@ -105,7 +104,7 @@ public static class ReceiverFrame
     public static byte[] AssembleSettings(IReadOnlyList<byte[]> frames)
     {
         if (frames.Count != SettingsFrameCount)
-            throw new InvalidDataException(Lang.T($"Cần {SettingsFrameCount} khung (nhận {frames.Count}).", $"Expected {SettingsFrameCount} frames (got {frames.Count})."));
+            throw new InvalidDataException(Lang.T("receiver.expected_frames_got", SettingsFrameCount, frames.Count));
         var data = new byte[Settings.Length];
         for (int i = 0; i < SettingsFrameCount; i++)
         {
@@ -113,7 +112,7 @@ public static class ReceiverFrame
             int expectedLen = Math.Min(PayloadLength, Settings.Length - i * PayloadLength);
             if (!HasValidChecksum(f) || f[0] != ReportId || f[1] != (byte)ReceiverCommand.ReadSettings ||
                 f[2] != SettingsFrameCount || f[3] != i || f[4] != expectedLen)
-                throw new InvalidDataException(Lang.T($"Khung settings #{i} không hợp lệ: {Hex.Format(f)}", $"Invalid settings frame #{i}: {Hex.Format(f)}"));
+                throw new InvalidDataException(Lang.T("receiver.invalid_settings_frame", i, Hex.Format(f)));
             f.AsSpan(PayloadOffset, expectedLen).CopyTo(data.AsSpan(i * PayloadLength));
         }
         return data;
@@ -122,7 +121,7 @@ public static class ReceiverFrame
     public static string Describe(ReadOnlySpan<byte> frame) =>
         frame.Length < PayloadOffset ? Hex.Format(frame)
         : $"0x13 cmd 0x{frame[1]:X2} ({(Enum.IsDefined((ReceiverCommand)frame[1]) ? ((ReceiverCommand)frame[1]).ToString() : "?")}) " +
-          Lang.T($"khung {frame[3] + 1}/{frame[2]}", $"frame {frame[3] + 1}/{frame[2]}") +
+          Lang.T("receiver.frame", frame[3] + 1, frame[2]) +
           $"{(PageOf(frame) > 0 ? $" page {PageOf(frame)}" : "")} len {LengthOf(frame)}";
 }
 
@@ -138,13 +137,11 @@ public static class ReceiverGuard
     public static void EnsureAllowed(ReadOnlySpan<byte> frame)
     {
         if (frame.Length != ReceiverFrame.Length)
-            throw new UnsafeCommandException(Lang.T($"Khung receiver phải dài {ReceiverFrame.Length} byte (nhận {frame.Length}).",
-                $"Receiver frame must be {ReceiverFrame.Length} bytes (got {frame.Length})."));
+            throw new UnsafeCommandException(Lang.T("receiver.receiver_frame_must_be_bytes", ReceiverFrame.Length, frame.Length));
         if (frame[0] != ReceiverFrame.ReportId)
-            throw new UnsafeCommandException(Lang.T($"Report ID 0x{frame[0]:X2} không được phép (chỉ 0x13).",
-                $"Report ID 0x{frame[0]:X2} not allowed (0x13 only)."));
+            throw new UnsafeCommandException(Lang.T("receiver.report_id_0x_not_allowed", frame[0]));
         if (!ReceiverFrame.HasValidChecksum(frame))
-            throw new UnsafeCommandException(Lang.T("Checksum khung receiver sai.", "Bad receiver frame checksum."));
+            throw new UnsafeCommandException(Lang.T("receiver.bad_receiver_frame_checksum"));
 
         var cmd = (ReceiverCommand)frame[1];
         byte count = frame[2], index = frame[3];
@@ -154,29 +151,24 @@ public static class ReceiverGuard
         {
             case ReceiverCommand.Status or ReceiverCommand.ReadInfo or ReceiverCommand.ReadSettings:
                 if (count != 1 || index != 0 || frame[4] != 0 || payload.ContainsAnyExcept((byte)0))
-                    throw new UnsafeCommandException(Lang.T($"Khung hỏi 0x{frame[1]:X2} khác capture (phải là 13 {frame[1]:X2} 01 00 00 … ).",
-                        $"Query frame 0x{frame[1]:X2} differs from capture (must be 13 {frame[1]:X2} 01 00 00 … )."));
+                    throw new UnsafeCommandException(Lang.T("receiver.query_frame_0x_differs_from", frame[1]));
                 break;
             case ReceiverCommand.WriteSettings or ReceiverCommand.WriteKeymap or ReceiverCommand.WriteColorTable:
                 int total = ReceiverFrame.DataLength(cmd);
                 int expectedCount = ReceiverFrame.FrameCount(total);
                 int expectedLen = Math.Min(ReceiverFrame.PayloadLength, total - index * ReceiverFrame.PayloadLength);
                 if (count != expectedCount || index >= expectedCount || len != expectedLen)
-                    throw new UnsafeCommandException(Lang.T($"Khung ghi 0x{frame[1]:X2} #{index} khác capture (count/index/len).",
-                        $"Write frame 0x{frame[1]:X2} #{index} differs from capture (count/index/len)."));
+                    throw new UnsafeCommandException(Lang.T("receiver.write_frame_0x_differs_from", frame[1], index));
                 int maxPage = cmd == ReceiverCommand.WriteKeymap ? ReceiverFrame.MaxWirelessKeymapPage : 0;
                 if (page > maxPage)
-                    throw new UnsafeCommandException(Lang.T($"Khung ghi 0x{frame[1]:X2} page {page} chưa thấy trong capture 2.4G.",
-                        $"Write frame 0x{frame[1]:X2} page {page} not seen in any 2.4G capture."));
+                    throw new UnsafeCommandException(Lang.T("receiver.write_frame_0x_page_not", frame[1], page));
                 if (payload[len..].ContainsAnyExcept((byte)0))
-                    throw new UnsafeCommandException(Lang.T("Phần pad sau payload phải toàn 0.", "Padding after payload must be all 0."));
+                    throw new UnsafeCommandException(Lang.T("receiver.padding_after_payload_must_be"));
                 if (cmd == ReceiverCommand.WriteSettings && index == expectedCount - 1 && !payload[..2].SequenceEqual(Settings.Magic))
-                    throw new UnsafeCommandException(Lang.T("Khung ghi settings cuối phải là magic 5A A5.",
-                        "The last settings write frame must be the 5A A5 magic."));
+                    throw new UnsafeCommandException(Lang.T("receiver.last_settings_write_frame_must"));
                 break;
             default:
-                throw new UnsafeCommandException(Lang.T($"Lệnh receiver 0x{frame[1]:X2} chưa thấy trong capture 2.4G — CẤM gửi.",
-                    $"Receiver command 0x{frame[1]:X2} not seen in any 2.4G capture — sending is FORBIDDEN."));
+                throw new UnsafeCommandException(Lang.T("receiver.receiver_command_0x_not_seen", frame[1]));
         }
     }
 }

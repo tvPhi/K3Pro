@@ -51,7 +51,7 @@ public sealed class K3ProReceiverDevice(
     public DeviceInfo ReadDeviceInfo()
     {
         var r = Query(ReceiverCommand.ReadInfo);
-        if (ReceiverFrame.LengthOf(r) < DeviceInfo.Length) throw new InvalidDataException(Lang.T($"Phản hồi 0x05 quá ngắn: {Hex.Format(r)}", $"0x05 response too short: {Hex.Format(r)}"));
+        if (ReceiverFrame.LengthOf(r) < DeviceInfo.Length) throw new InvalidDataException(Lang.T("receiverdevice.0x05_response_too_short", Hex.Format(r)));
         return DeviceInfo.Parse(r.AsSpan(ReceiverFrame.PayloadOffset, DeviceInfo.Length));
     }
 
@@ -103,12 +103,10 @@ public sealed class K3ProReceiverDevice(
                 }
                 catch (Exception ex) when (ex is TimeoutException or InvalidDataException)
                 {
-                    throw new IOException(Lang.T($"{ex.Message} (chưa gửi khung ghi nào — thiết bị không đổi).",
-                        $"{ex.Message} (no write frame sent yet — device unchanged)."), ex);
+                    throw new IOException(Lang.T("receiverdevice.no_write_frame_sent_yet", ex.Message), ex);
                 }
                 if (write.ExpectedSettings is { } expected && !now.Data.SequenceEqual(expected.Data))
-                    throw new InvalidOperationException(Lang.T("Block settings trên thiết bị đã đổi từ lúc lập kế hoạch — hủy, hãy làm lại.",
-                        "The device's settings block changed since the plan was made — cancelled, please try again."));
+                    throw new InvalidOperationException(Lang.T("wired.device_s_settings_block_changed"));
             }
 
             var frames = WireEncoding.Encode(Kind, write);
@@ -123,18 +121,13 @@ public sealed class K3ProReceiverDevice(
             }
             catch (Exception ex) when (ex is TimeoutException or InvalidDataException)
             {
-                throw new IOException(Lang.T(
-                    $"{ex.Message} — đã gửi {sent}/{frames.Count} khung của \"{write.Title}\": dữ liệu trên thiết bị " +
-                    "có thể dở dang, hãy Apply lại.",
-                    $"{ex.Message} — sent {sent}/{frames.Count} frames of \"{write.Title}\": data on the device " +
-                    "may be incomplete, please Apply again."), ex);
+                throw new IOException(Lang.T("receiverdevice.sent_frames_data_device_may", ex.Message, sent, frames.Count, write.Title), ex);
             }
             onSent?.Invoke(write);
 
             // Only settings have a read command (0x44) to verify against; keymap / color table have no read command yet.
             if (isSettings && !ReadSettings().Data.SequenceEqual(write.Packet.AsSpan(K3ProConstants.HeaderLength, Settings.Length)))
-                throw new InvalidDataException(Lang.T("Đọc lại settings qua 2.4G khác block vừa ghi.",
-                    "Settings read back over 2.4G differ from the block just written."));
+                throw new InvalidDataException(Lang.T("receiverdevice.settings_read_back_over_2"));
         }
     }
 
@@ -152,8 +145,7 @@ public sealed class K3ProReceiverDevice(
             {
                 var echo = Receive(cmd, r => r[3] == frame[3]);
                 if (!echo.AsSpan().SequenceEqual(frame))
-                    throw new InvalidDataException(Lang.T($"Receiver không echo đúng khung {frame[3] + 1}/{frame[2]}: {Hex.Format(echo)}",
-                        $"Receiver did not echo frame {frame[3] + 1}/{frame[2]} correctly: {Hex.Format(echo)}"));
+                    throw new InvalidDataException(Lang.T("receiverdevice.receiver_did_not_echo_frame", frame[3] + 1, frame[2], Hex.Format(echo)));
                 return;
             }
             catch (TimeoutException) when (attempt < MaxResends)
@@ -190,9 +182,7 @@ public sealed class K3ProReceiverDevice(
     /// Timeout → the numpad may be asleep.
     /// </summary>
     private byte[] Receive(ReceiverCommand command, Func<byte[], bool>? match = null) =>
-        TryReceive(command, match) ?? throw new TimeoutException(Lang.T(
-            $"Receiver không trả lời lệnh 0x{(byte)command:X2} — numpad đang ngủ / tắt? Bấm một phím trên numpad rồi thử lại.",
-            $"Receiver did not answer command 0x{(byte)command:X2} — is the numpad asleep / off? Press a key on the numpad and try again."));
+        TryReceive(command, match) ?? throw new TimeoutException(Lang.T("receiverdevice.receiver_did_not_answer_command", (byte)command));
 
     private byte[]? TryReceive(ReceiverCommand command, Func<byte[], bool>? match)
     {
@@ -204,7 +194,7 @@ public sealed class K3ProReceiverDevice(
             if (r is null) return null;
             if (r.Length != ReceiverFrame.Length || r[0] != ReceiverFrame.ReportId || r[1] != (byte)command) continue;
             if (match is not null && !match(r)) continue;
-            if (!ReceiverFrame.HasValidChecksum(r)) throw new InvalidDataException(Lang.T($"Checksum phản hồi sai: {Hex.Format(r)}", $"Bad response checksum: {Hex.Format(r)}"));
+            if (!ReceiverFrame.HasValidChecksum(r)) throw new InvalidDataException(Lang.T("receiverdevice.bad_response_checksum", Hex.Format(r)));
             return r;
         }
     }

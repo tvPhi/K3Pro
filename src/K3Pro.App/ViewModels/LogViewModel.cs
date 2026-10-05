@@ -49,7 +49,7 @@ public partial class LogViewModel : ObservableObject
 
     public string LogDir { get; }
 
-    public string Header => T($"Log gói SET / GET / OUT / IN (bản đầy đủ: {LogDir})", $"Packet log SET / GET / OUT / IN (full log: {LogDir})");
+    public string Header => T("log.packet_log_set_get_out", LogDir);
 
     public void RefreshLanguage() => OnPropertyChanged(nameof(Header));
 

@@ -51,8 +51,7 @@ public sealed class HidDeviceService(PacketLog log) : IDeviceService
     public static readonly TimeSpan WakePollInterval = TimeSpan.FromSeconds(3);
     public static readonly TimeSpan LinkPollInterval = TimeSpan.FromSeconds(10);
     public static readonly TimeSpan BluetoothPollInterval = TimeSpan.FromSeconds(15);
-    private static string SleepingMessage => Lang.T("numpad 2.4G không phản hồi (đang ngủ / tắt) — bấm một phím, app tự kết nối lại",
-        "2.4G numpad not responding (asleep / off) — press a key and the app reconnects automatically");
+    private static string SleepingMessage => Lang.T("service.2_4g_numpad_not_responding");
 
     private readonly SemaphoreSlim _gate = new(1, 1);
     private CancellationTokenSource? _debounce;
@@ -109,7 +108,7 @@ public sealed class HidDeviceService(PacketLog log) : IDeviceService
         }
         catch (Exception ex)
         {
-            log.Error(Lang.T($"Dò kết nối lỗi: {ex.Message}", $"Connection probe failed: {ex.Message}"));
+            log.Error(Lang.T("service.connection_probe_failed", ex.Message));
         }
         finally
         {
@@ -133,9 +132,8 @@ public sealed class HidDeviceService(PacketLog log) : IDeviceService
             if (status == Bluetooth) return;
             if (status.Connected != Bluetooth.Connected)
                 log.Info(status.Connected
-                    ? Lang.T($"Bluetooth: K3PRO 5.0 đang kết nối ({status.Address}), pin {status.BatteryPercent?.ToString() ?? "?"}%",
-                        $"Bluetooth: K3PRO 5.0 connected ({status.Address}), battery {status.BatteryPercent?.ToString() ?? "?"}%")
-                    : Lang.T("Bluetooth: K3PRO 5.0 đã ngắt kết nối.", "Bluetooth: K3PRO 5.0 disconnected."));
+                    ? Lang.T("service.bluetooth_k3pro_5_0_connected", status.Address, status.BatteryPercent?.ToString() ?? "?")
+                    : Lang.T("service.bluetooth_k3pro_5_0_disconnected"));
             Bluetooth = status;
             BluetoothChanged?.Invoke(status);
         }
@@ -155,7 +153,7 @@ public sealed class HidDeviceService(PacketLog log) : IDeviceService
             var wired = await Task.Run(() => HidSharpTransport.FindCandidates().Select(d => d.DevicePath).ToList());
             if (wired.Count > 1)
             {
-                Disconnect(Lang.T($"{wired.Count} interface khớp — không chắc chọn đúng.", $"{wired.Count} matching interfaces — cannot tell which one is right."), LogKind.Error);
+                Disconnect(Lang.T("service.matching_interfaces_cannot_tell_which", wired.Count), LogKind.Error);
                 return;
             }
             if (wired.Count == 1)
@@ -202,8 +200,8 @@ public sealed class HidDeviceService(PacketLog log) : IDeviceService
 
     private void Connect(ConnectionKind kind, string path, DeviceInfo info)
     {
-        log.Info(kind == ConnectionKind.Wired ? Lang.T($"Kết nối có dây: {path}", $"Connected by cable: {path}") : Lang.T($"Kết nối 2.4G qua receiver: {path}", $"Connected via 2.4G receiver: {path}"));
-        log.Info($"Info → {info} {(info.MatchesCapture ? Lang.T("✅ khớp capture", "✅ matches capture") : Lang.T("⚠ KHÁC capture", "⚠ DIFFERS from capture"))}");
+        log.Info(kind == ConnectionKind.Wired ? Lang.T("service.connected_cable", path) : Lang.T("service.connected_via_2_4g_receiver", path));
+        log.Info($"Info → {info} {(info.MatchesCapture ? Lang.T("service.matches_capture") : Lang.T("service.differs_from_capture"))}");
         if (K3ProConnections.IsVendorAppRunning()) log.Warning(K3ProConnections.VendorAppWarning);
         SetState(new(true, path, info, null, kind));
     }
@@ -212,8 +210,8 @@ public sealed class HidDeviceService(PacketLog log) : IDeviceService
     private void Disconnect(string? error, LogKind kind)
     {
         if (!State.IsConnected && State.Error == error) return;
-        if (State.IsConnected) log.Warning(Lang.T("Mất kết nối thiết bị.", "Device disconnected."));
-        if (error is not null) log.Add(kind, Lang.T($"Chưa kết nối: {error}", $"Not connected: {error}"));
+        if (State.IsConnected) log.Warning(Lang.T("service.device_disconnected"));
+        if (error is not null) log.Add(kind, Lang.T("service.not_connected", error));
         SetState(ConnectionState.Disconnected with { Error = error });
     }
 
@@ -225,9 +223,8 @@ public sealed class HidDeviceService(PacketLog log) : IDeviceService
         RunAsync(d =>
         {
             if (d.Kind != expectedKind)
-                throw new InvalidOperationException(Lang.T("Kết nối đã đổi (dây ↔ 2.4G) từ lúc bấm Apply — hủy, hãy Apply lại.",
-                    "The connection changed (cable ↔ 2.4G) since Apply was pressed — cancelled, please Apply again."));
-            d.Execute(plan, w => log.Info(Lang.T($"Đã gửi: {w.Title}", $"Sent: {w.Title}")));
+                throw new InvalidOperationException(Lang.T("service.connection_changed_cable_2_4g"));
+            d.Execute(plan, w => log.Info(Lang.T("service.sent", w.Title)));
             return true;
         });
 
