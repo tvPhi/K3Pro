@@ -77,6 +77,8 @@ The user's main goal: change the sleep time in 2.4G mode (the vendor app hides t
 - The app has NO dry-run: Apply always writes to the numpad (user request, 2026-10-02 — removed the Dry-run toggle and the "SENDING FOR REAL" badge).
   Dry-run only exists in the CLI (default; a real write needs `--send` + asking before each run).
 - A log panel shows every packet sent/received (hex + time).
+- On every cable / 2.4G link-up the app reads the settings block once (0x84 / 0x44) and shows it (sleep slider, active effect,
+  brightness / speed) — `MainWindowViewModel.LoadSettingsAsync`. Read only; the keymap can't be read.
 - Claude Code does NOT run the app and press Apply itself (the app always writes for real). Writing through the UI is done by the user.
 - All safety rules above still apply to the UI: don't add features that need a command not seen in a capture.
 - The UI contains no protocol logic: building packets / read-modify-write / checks all live in K3Pro.Protocol (`WritePlanner`, `K3ProDevice.Execute`).

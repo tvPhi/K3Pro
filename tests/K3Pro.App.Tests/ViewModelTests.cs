@@ -99,6 +99,35 @@ public class ViewModelTests
     }
 
     [AvaloniaFact]
+    public async Task Current_settings_are_read_on_connect_and_shown()
+    {
+        using var h = new TestHarness();
+        h.Device.Settings = CaptureBaseline.ReferenceSettings().WithSleepUnits(20)
+            .WithLightingMode(LightingModes.Respire).WithBrightness(LightingModes.Respire, 2);
+
+        var vm = h.CreateViewModel(UiLanguage.En); // fake device starts connected (cable)
+        await vm.SettingsLoad;
+
+        Assert.Equal(20, vm.Device.SleepUnits);              // slider shows the numpad's 10 min, not the 5 min default
+        Assert.Equal("10 Min", vm.Device.SleepText);
+        Assert.Equal("Device (offset 0x18): 0x14 = 10 Min", vm.Device.DeviceSleepLine);
+        Assert.Equal("Respire", vm.Lighting.SelectedEffect?.Label);
+        Assert.True(vm.Lighting.SelectedEffect!.IsCurrent);
+        Assert.Equal(2, vm.Lighting.EffectBrightness);
+        Assert.Empty(h.Device.Executed);                     // read only
+        int reads = h.Device.Reads;
+
+        // 2.4G numpad falls asleep, the settings change elsewhere, it wakes up → read again
+        h.Device.Raise(ConnectionState.Disconnected with { Error = "asleep" });
+        h.Device.Settings = h.Device.Settings.WithSleepUnits(40);
+        h.Device.Raise(new ConnectionState(true, "receiver", DeviceInfo.Parse([0x03, 0x00, 0x00, 0x00, 0x00, 0x17]), null, ConnectionKind.Wireless));
+        await vm.SettingsLoad;
+
+        Assert.Equal(reads + 1, h.Device.Reads);
+        Assert.Equal(40, vm.Device.SleepUnits);
+    }
+
+    [AvaloniaFact]
     public void Old_settings_file_with_dry_run_field_still_loads()
     {
         using var h = new TestHarness();
@@ -320,9 +349,10 @@ public class ViewModelTests
         var selfDefine = vm.Effects.Single(e => e.Label == "Self-define");
 
         Assert.Equal(17, vm.CapturedEffectCount);
+        Assert.Equal("Rainbow", vm.SelectedEffect?.Label); // read on connect: the active effect is pre-selected
         await vm.PickEffectCommand.ExecuteAsync(selfDefine); // needs command 02 — not supported yet
-        Assert.Null(vm.SelectedEffect);
-        Assert.False(vm.CanApplyEffect);
+        Assert.Equal("Rainbow", vm.SelectedEffect?.Label);
+        Assert.False(selfDefine.IsSelected);
 
         await vm.PickEffectCommand.ExecuteAsync(fixedOn);
         Assert.True(fixedOn.IsSelected);

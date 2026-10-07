@@ -145,6 +145,7 @@
   "lighting.current_mode_0x84_offset_0x0a": "Mode hiện tại (0x84, offset 0x0A): {0}",
   "log.packet_log_set_get_out": "Log gói SET / GET / OUT / IN (bản đầy đủ: {0})",
   "main.could_not_save": "Không lưu được {0}: {1}",
+  "main.auto_read_failed": "Không đọc được settings hiện tại từ numpad: {0} — bấm \"Đọc 0x84\" trong tab Device để thử lại.",
   "session.not_connected": "Chưa kết nối",
   "session.battery_bluetooth_read_os_from": "Pin (Bluetooth) — hệ điều hành đọc từ BLE Battery Service, app không gửi gì xuống numpad",
   "session.connected_via_2_4g_receiver": "Đã kết nối qua 2.4G (receiver 3554:FA09)",

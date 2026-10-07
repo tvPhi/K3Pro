@@ -24,6 +24,8 @@ public sealed record AppServices(
 public partial class MainWindowViewModel : ObservableObject
 {
     private readonly AppSettingsStore _settings;
+    private readonly IDeviceService _device;
+    private ConnectionState _lastState = ConnectionState.Disconnected;
     private readonly AppSettings _appSettings;
     private readonly PacketLog _log;
     private readonly bool _ready;
@@ -49,12 +51,53 @@ public partial class MainWindowViewModel : ObservableObject
         Device = new DeviceViewModel(Session, s.Device, writer, s.Log, s.KeymapStore.Path, s.LayoutPath, s.DataDir, Updates);
 
         if (s.LayoutError is not null) s.Log.Error(s.LayoutError);
-        s.Device.ConnectionChanged += state => Ui.Post(() => Session.Apply(state));
-        Session.Apply(s.Device.State);
+        _device = s.Device;
+        s.Device.ConnectionChanged += state => Ui.Post(() => OnConnectionChanged(state));
+        OnConnectionChanged(s.Device.State);
         s.Device.BluetoothChanged += status => Ui.Post(() => Session.Apply(status));
         Session.Apply(s.Device.Bluetooth);
         _ready = true;
         StartupUpdateCheck = Updates.StartupCheckAsync();
+    }
+
+    /// <summary>The latest automatic settings read (completed when nothing was read) — awaited by tests.</summary>
+    public Task SettingsLoad { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    /// Every time a cable / 2.4G link comes up (startup, cable plugged in, 2.4G numpad woke up, switched mode), read the settings
+    /// block once (read command 0x84 / 0x44 — allowed) and show it in the Device and Lighting tabs, so the UI shows what is on the
+    /// numpad instead of defaults. The keymap can't be read (no read command), it comes from keymap-state.json.
+    /// </summary>
+    private void OnConnectionChanged(ConnectionState state)
+    {
+        var previous = _lastState;
+        _lastState = state;
+        Session.Apply(state);
+        bool linkUp = state.IsConnected && (!previous.IsConnected || previous.Kind != state.Kind || previous.DevicePath != state.DevicePath);
+        if (linkUp && SettingsLoad.IsCompleted) SettingsLoad = LoadSettingsAsync();
+    }
+
+    private async Task LoadSettingsAsync()
+    {
+        byte[] raw;
+        try
+        {
+            raw = await _device.ReadSettingsRawAsync();
+        }
+        catch (Exception ex)
+        {
+            _log.Warning(T("main.auto_read_failed", ex.Message));
+            return;
+        }
+        Device.ShowSettings(raw);
+        try
+        {
+            Lighting.ShowSettings(Settings.Parse(raw));
+        }
+        catch (InvalidDataException)
+        {
+            // corrupt block: the Device tab already shows the hex + the error
+        }
     }
 
     /// <summary>The startup update check (completes immediately when disabled) — awaited by tests.</summary>

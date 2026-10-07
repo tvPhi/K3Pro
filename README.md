@@ -158,6 +158,8 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
   with **🌐** in the top-right corner, and the choice is remembered.
 - The top bar shows the connection, e.g. *Connected by cable 258A:010C* or *Connected via 2.4G*.
 - **Apply writes to the numpad immediately** and shows a "Saved" or error message. There is no confirmation dialog.
+- Whenever the numpad connects (startup, cable plugged in, 2.4G numpad waking up) the app **reads its current settings** and shows
+  them: sleep time, active light effect, brightness and speed. The keymap can't be read back (see [Things to know](#things-to-know)).
 
 ### Cable vs 2.4G wireless
 
@@ -187,7 +189,7 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 
 ### Device tab (sleep timer)
 
-- **Sleep (2.4G mode)**: choose one of the 10 steps (30 s … 20 min) and click **Apply**.
+- **Sleep (2.4G mode)**: the slider shows the value stored on the numpad; choose one of the 10 steps (30 s … 20 min) and click **Apply**.
 - **Settings block**: a read-only hex view of the 128-byte settings block, with the fields that are known.
 - **Open data folder**: opens the folder where the app keeps its files (see below).
 

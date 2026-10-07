@@ -269,6 +269,22 @@ public partial class LightingViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Shows a settings block read from the device (automatic read on connect): the active effect gets the blue outline and —
+    /// if the user hasn't picked one — is selected, so its brightness / speed appear on the sliders. Nothing is written.
+    /// </summary>
+    public void ShowSettings(Settings s)
+    {
+        _settings = s;
+        SetMode(s.LightingMode, false);
+        if (SelectedEffect is null && Effects.FirstOrDefault(e => e.IsEnabled && e.Effect.Mode == s.LightingMode) is { } active)
+        {
+            foreach (var e in Effects) e.IsSelected = ReferenceEquals(e, active);
+            SelectedEffect = active;
+        }
+        LoadEffectParams();
+    }
+
     private async Task<Settings?> ReadSettingsAsync()
     {
         try

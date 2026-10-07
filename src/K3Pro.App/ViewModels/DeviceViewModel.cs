@@ -126,11 +126,17 @@ public partial class DeviceViewModel : ObservableObject
             return;
         }
 
+        ShowSettings(raw);
+    }
+
+    /// <summary>Shows a settings block read from the device (also used by the automatic read on connect).</summary>
+    public void ShowSettings(byte[] raw)
+    {
         _raw = raw;
         if (RenderSettings() is { } s)
         {
             ShowSleep(s);
-            SleepUnits = s.SleepUnits;
+            SleepUnits = s.SleepUnits; // slider jumps to the value stored on the numpad
         }
     }
 
